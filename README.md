@@ -24,6 +24,8 @@ The midterm implementation currently provides:
 
 See [docs/PROGRESS.md](docs/PROGRESS.md) for the source of truth on completed and future work.
 
+The rendered and visually verified midterm submission is available as [SOC Alert Correlation Midterm Report](docs/SOC_Alert_Correlation_Midterm_Report.docx). Its reproducible generator is checked in under `scripts/create_midterm_report.py`.
+
 ## Build
 
 Requires a C++17 compiler and CMake 3.20 or newer.
@@ -79,4 +81,3 @@ scripts/         Reserved for repeatable project utilities
 ## Safety and scope
 
 This is a defensive alert-analysis simulator. It does not scan systems, exploit vulnerabilities, or execute offensive actions.
-

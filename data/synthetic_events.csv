@@ -1,0 +1,24 @@
+event_id,timestamp,source_ip,destination_ip,username,hostname,event_type,severity,description,source,scenario_label
+N001,1722500000,10.0.0.11,10.0.0.20,mina,laptop-11,NORMAL_ACTIVITY,INFORMATIONAL,Routine sign-in,identity,normal
+N002,1722500030,10.0.0.12,10.0.0.30,dev,workstation-12,NORMAL_ACTIVITY,INFORMATIONAL,Routine application access,application,normal
+N003,1722500060,10.0.0.13,10.0.0.40,sam,laptop-13,NORMAL_ACTIVITY,LOW,Expected file synchronization,endpoint,normal
+C001,1722500100,203.0.113.45,10.0.0.25,alex,workstation-25,FAILED_LOGIN,MEDIUM,Failed interactive login,identity,credential_compromise
+C002,1722500120,203.0.113.45,10.0.0.25,alex,workstation-25,FAILED_LOGIN,MEDIUM,Second failed interactive login,identity,credential_compromise
+C003,1722500140,203.0.113.45,10.0.0.25,alex,workstation-25,SUCCESSFUL_LOGIN,HIGH,Login succeeded after failures,identity,credential_compromise
+C004,1722500170,10.0.0.25,10.0.0.5,alex,workstation-25,PRIVILEGE_ESCALATION,CRITICAL,Unexpected administrator role granted,endpoint,credential_compromise
+C005,1722500200,10.0.0.25,10.0.0.5,alex,workstation-25,FILE_ACCESS,HIGH,Restricted configuration file accessed,endpoint,credential_compromise
+N004,1722500400,10.0.0.14,10.0.0.20,lee,laptop-14,NORMAL_ACTIVITY,INFORMATIONAL,Routine sign-in,identity,normal
+N005,1722500450,10.0.0.15,10.0.0.30,robin,workstation-15,NORMAL_ACTIVITY,LOW,Approved software update,endpoint,normal
+R001,1722501000,198.51.100.77,10.0.1.10,,edge-gateway,CONNECTION_ATTEMPT,LOW,Connection attempt to web service,network,reconnaissance
+R002,1722501030,198.51.100.77,10.0.1.11,,edge-gateway,CONNECTION_ATTEMPT,LOW,Connection attempt to mail service,network,reconnaissance
+R003,1722501060,198.51.100.77,10.0.1.12,,edge-gateway,PORT_SCAN,MEDIUM,Multiple destination ports contacted,network,reconnaissance
+R004,1722501090,198.51.100.77,10.0.1.12,,edge-gateway,SERVICE_DISCOVERY,HIGH,Service banner enumeration pattern,network,reconnaissance
+N006,1722501400,10.0.0.16,10.0.0.20,taylor,laptop-16,NORMAL_ACTIVITY,INFORMATIONAL,Routine sign-in,identity,normal
+N007,1722501450,10.0.0.17,10.0.0.30,jordan,workstation-17,NORMAL_ACTIVITY,INFORMATIONAL,Routine application access,application,normal
+X001,1722502000,10.0.2.44,10.0.2.5,svc-backup,server-44,PRIVILEGED_ACCESS,HIGH,Privileged backup account used,identity,possible_exfiltration
+X002,1722502040,10.0.2.44,10.0.2.5,svc-backup,server-44,SENSITIVE_FILE_ACCESS,HIGH,Sensitive archive opened,endpoint,possible_exfiltration
+X003,1722502080,10.0.2.44,192.0.2.90,svc-backup,server-44,OUTBOUND_CONNECTION,HIGH,Unusual external destination contacted,network,possible_exfiltration
+X004,1722502120,10.0.2.44,192.0.2.90,svc-backup,server-44,LARGE_OUTBOUND_TRANSFER,CRITICAL,Large outbound byte volume,network,possible_exfiltration
+N008,1722502500,10.0.0.18,10.0.0.20,casey,laptop-18,NORMAL_ACTIVITY,INFORMATIONAL,Routine sign-in,identity,normal
+N009,1722502600,10.0.0.19,10.0.0.30,morgan,workstation-19,NORMAL_ACTIVITY,LOW,Expected report download,application,normal
+N010,1722502700,10.0.0.20,10.0.0.50,pat,workstation-20,NORMAL_ACTIVITY,INFORMATIONAL,Health check request,network,normal

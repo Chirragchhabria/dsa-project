@@ -22,6 +22,9 @@ This file is the source of truth for midterm reporting. A capability is listed a
 - Defensive synthetic dataset with normal activity and three labeled multi-event scenarios.
 - CLI reporting data-derived counts, graph size, incident timelines, scores, and explanations.
 - Behavioral test executable covering CSV parsing, malformed rows, indexes, linked-list operations, sliding-window expiration, graph construction, BFS, recursive DFS, correlation boundaries, incident creation, and heap ordering.
+- Versioned JSON CLI output, configurable window/minimum incident size, and black-box CLI integration checks.
+- Pairwise grouping evaluator on labeled synthetic data and deterministic dataset/benchmark scripts.
+- Cross-platform CI workflow, contribution guide, and security policy.
 - CMake 4.4.4 configuration and build, followed by a passing CTest run on Apple Clang 21.0.0.
 
 ## Verification evidence
@@ -60,8 +63,8 @@ The scenario names above come from the controlled dataset design. The engine its
 ## Not yet completed
 
 - Larger public or safely replayed datasets.
-- Dedicated benchmark executable and measured throughput, latency, or memory results.
-- Precision/recall and ranking-quality evaluation against ground truth.
+- Published, repeatable throughput and memory measurements across meaningful dataset sizes and environments.
+- Evaluation on larger independently labeled datasets and ranking-quality measurements. The current pairwise precision/recall result is only on the controlled presentation dataset.
 - Configurable/composable rule objects beyond the initial three event families.
 - Attack-chain reconstruction beyond chronological incident timelines.
 - Dedicated `RiskScorer`, metrics, and benchmark modules.
@@ -73,3 +76,7 @@ No performance or accuracy claims have been made because those measurements do n
 
 Confirm the professor's midterm rubric and rehearse the CLI demonstration. For the final-project increment, add a benchmark harness and a deterministic larger dataset generator. Capture measurements before adding any performance figures to reports or resume bullets.
 
+
+## Release preparation added after the midterm snapshot
+
+The repository now includes JSON CLI output, command-line correlation settings, an integration test, a deterministic synthetic dataset generator, a pairwise grouping evaluator, a wall-time benchmark harness, and CI configuration. On the 19-row presentation sample, the evaluator reports 22/22 correct event pairs (pairwise precision, recall, and F1 of 1.0). This is a result on planted synthetic labels only. No real-world accuracy claim follows from it. The historical verification figures above describe the original midterm snapshot; run the current commands in the README for a fresh check.

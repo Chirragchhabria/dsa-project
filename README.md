@@ -83,3 +83,26 @@ scripts/         Reserved for repeatable project utilities
 ## Safety and scope
 
 This is a defensive alert-analysis simulator. It does not scan systems, exploit vulnerabilities, or execute offensive actions.
+
+## CLI and JSON output
+
+```bash
+./build/soc_cli data/presentation_events.csv --window 300 --min-events 2
+./build/soc_cli data/presentation_events.csv --format json > incidents.json
+./build/soc_cli --help
+```
+
+`--window` sets the maximum separation for a *direct pairwise edge* in seconds. `--min-events` sets the minimum connected-component size reported as an incident. JSON output uses `schema_version: 1` and includes input/configuration, load errors, summary counts, ordered incidents, event timelines, scores, and explanations. Diagnostics go to standard error; JSON goes to standard output.
+
+## Evaluation and performance
+
+```bash
+python3 scripts/evaluate.py data/presentation_events.csv
+python3 scripts/benchmark.py --incidents 100 --noise 1000 --seed 42 --runs 5
+```
+
+The evaluator measures pairwise incident grouping against synthetic `scenario_label` values. Labels `normal` and `unrelated` are negative examples. This metric does not establish detection quality on real traffic. The benchmark measures end-to-end CLI wall time on deterministic synthetic data; report the machine and build mode with any result. See [scripts/README.md](scripts/README.md) and [benchmarks/README.md](benchmarks/README.md).
+
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+
+See [ROADMAP.md](ROADMAP.md) for the path from the current prototype to a more robust public release.

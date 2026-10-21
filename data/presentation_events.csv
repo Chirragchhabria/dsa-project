@@ -1,0 +1,20 @@
+event_id,timestamp,source_ip,destination_ip,username,hostname,event_type,severity,description,source,scenario_label
+NORMAL-01,1792573200,10.0.0.11,10.0.0.20,mina,laptop-11,NORMAL_ACTIVITY,INFORMATIONAL,Routine employee sign-in,identity,normal
+NORMAL-02,1792573260,10.0.0.12,10.0.0.30,dev,workstation-12,NORMAL_ACTIVITY,INFORMATIONAL,Routine application access,application,normal
+NORMAL-03,1792573320,10.0.0.13,10.0.0.40,sam,laptop-13,NORMAL_ACTIVITY,LOW,Scheduled file synchronization,endpoint,normal
+AUTH-01,1792573500,203.0.113.45,10.0.0.25,maya,workstation-25,FAILED_LOGIN,MEDIUM,First failed sign-in from unfamiliar IP,identity,credential_compromise
+AUTH-02,1792573530,203.0.113.45,10.0.0.25,maya,workstation-25,FAILED_LOGIN,MEDIUM,Second failed sign-in thirty seconds later,identity,credential_compromise
+AUTH-03,1792573560,203.0.113.45,10.0.0.25,maya,workstation-25,SUCCESSFUL_LOGIN,HIGH,Sign-in succeeds from the same IP,identity,credential_compromise
+AUTH-04,1792573620,10.0.0.25,10.0.0.5,maya,workstation-25,PRIVILEGE_ESCALATION,CRITICAL,Account receives administrator privileges,endpoint,credential_compromise
+AUTH-05,1792573680,10.0.0.25,10.0.0.5,maya,workstation-25,FILE_ACCESS,HIGH,Restricted configuration file opened,endpoint,credential_compromise
+DECOY-01,1792573710,203.0.113.45,10.0.0.25,,workstation-25,CONNECTION_ATTEMPT,LOW,Same IP nearby but different activity family,network,unrelated
+NORMAL-04,1792573920,10.0.0.14,10.0.0.20,lee,laptop-14,NORMAL_ACTIVITY,INFORMATIONAL,Routine employee sign-in,identity,normal
+RECON-01,1792574400,198.51.100.77,10.0.1.10,,edge-gateway,CONNECTION_ATTEMPT,LOW,External IP contacts the web server,network,reconnaissance
+RECON-02,1792574430,198.51.100.77,10.0.1.11,,edge-gateway,CONNECTION_ATTEMPT,LOW,Same IP contacts the mail server,network,reconnaissance
+RECON-03,1792574460,198.51.100.77,10.0.1.12,,edge-gateway,PORT_SCAN,MEDIUM,Same IP probes several service ports,network,reconnaissance
+RECON-04,1792574490,198.51.100.77,10.0.1.12,,edge-gateway,SERVICE_DISCOVERY,HIGH,Service banner information requested,network,reconnaissance
+EXFIL-01,1792575000,10.0.2.44,10.0.2.5,svc-backup,server-44,PRIVILEGED_ACCESS,HIGH,Backup account uses elevated access,identity,possible_exfiltration
+EXFIL-02,1792575060,10.0.2.44,10.0.2.5,svc-backup,server-44,SENSITIVE_FILE_ACCESS,HIGH,Sensitive archive opened,endpoint,possible_exfiltration
+EXFIL-03,1792575120,10.0.2.44,192.0.2.90,svc-backup,server-44,OUTBOUND_CONNECTION,HIGH,Unexpected external destination contacted,network,possible_exfiltration
+EXFIL-04,1792575180,10.0.2.44,192.0.2.90,svc-backup,server-44,LARGE_OUTBOUND_TRANSFER,CRITICAL,Large outbound transfer follows archive access,network,possible_exfiltration
+DECOY-02,1792575900,203.0.113.45,10.0.0.25,maya,workstation-25,FAILED_LOGIN,LOW,Same account returns much later outside the time window,identity,unrelated

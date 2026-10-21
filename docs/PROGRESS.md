@@ -1,6 +1,6 @@
 # Implementation Progress
 
-Last verified: 2026-09-17
+Last verified: 2026-10-21
 
 This file is the source of truth for midterm reporting. A capability is listed as completed only when its implementation compiles and its relevant checks pass.
 
@@ -22,10 +22,11 @@ This file is the source of truth for midterm reporting. A capability is listed a
 - Defensive synthetic dataset with normal activity and three labeled multi-event scenarios.
 - CLI reporting data-derived counts, graph size, incident timelines, scores, and explanations.
 - Behavioral test executable covering CSV parsing, malformed rows, indexes, linked-list operations, sliding-window expiration, graph construction, BFS, recursive DFS, correlation boundaries, incident creation, and heap ordering.
+- CMake 4.4.4 configuration and build, followed by a passing CTest run on Apple Clang 21.0.0.
 
 ## Verification evidence
 
-The machine used for this verification has Apple Clang 21.0.0 but does not currently have CMake installed. Therefore the checked-in CMake configuration exists but was not falsely reported as executed. Equivalent C++17 compile/link commands were run directly with strict warnings.
+On 2026-10-21, CMake 4.4.4 configured and built the project with Apple Clang 21.0.0. CTest passed its registered `soc_tests` target (1/1); the target runs seven behavioral test groups. A separate direct Clang build with AddressSanitizer and UndefinedBehaviorSanitizer also passed all seven groups.
 
 Observed test result:
 
@@ -58,7 +59,6 @@ The scenario names above come from the controlled dataset design. The engine its
 
 ## Not yet completed
 
-- CMake/CTest execution on a machine with CMake installed.
 - Larger public or safely replayed datasets.
 - Dedicated benchmark executable and measured throughput, latency, or memory results.
 - Precision/recall and ranking-quality evaluation against ground truth.
@@ -71,5 +71,5 @@ No performance or accuracy claims have been made because those measurements do n
 
 ## Next recommended increment
 
-Install CMake, reproduce the build with CTest, then add a benchmark harness and a deterministic larger dataset generator. Capture measurements before adding any performance figures to reports or resume bullets.
+Confirm the professor's midterm rubric and rehearse the CLI demonstration. For the final-project increment, add a benchmark harness and a deterministic larger dataset generator. Capture measurements before adding any performance figures to reports or resume bullets.
 

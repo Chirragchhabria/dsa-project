@@ -44,6 +44,8 @@ Run the demonstration from the repository root:
 
 Pass another CSV path as the first argument to analyze a different event file.
 
+For a shorter classroom walkthrough, run `./build/soc_cli data/presentation_events.csv`. That separate 19-event synthetic file includes three easy-to-follow scenarios and two decoys that show why a shared entity alone does not create an incident. See [data/PRESENTATION_DATASET.md](data/PRESENTATION_DATASET.md) for the expected timeline. The CLI prints readable UTC times and descriptions for each incident event.
+
 ## CSV schema
 
 Required columns are `event_id`, `timestamp`, `event_type`, and `severity`. Timestamp values are Unix seconds. An event must also have at least one correlatable IP, user, or host entity.

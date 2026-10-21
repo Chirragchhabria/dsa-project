@@ -112,13 +112,14 @@ def add_page_number(paragraph):
 def add_toc_line(doc, title, page, indent=0):
     paragraph = doc.add_paragraph()
     paragraph.paragraph_format.left_indent = Inches(indent)
-    paragraph.paragraph_format.space_after = Pt(3)
+    paragraph.paragraph_format.space_after = Pt(12)
+    paragraph.paragraph_format.line_spacing = 1.15
     paragraph.paragraph_format.tab_stops.add_tab_stop(
-        Inches(6.65 - indent), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS
+        Inches(6.5 - indent), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS
     )
     run = paragraph.add_run(title + "\t" + str(page))
     set_run_font(run)
-    run.font.size = Pt(10.2)
+    run.font.size = Pt(10.5)
 
 
 def add_paragraph(doc, text="", bold_lead=None, style=None):
@@ -396,6 +397,7 @@ def build_report():
     add_cover(doc)
 
     add_heading(doc, "Table of Contents", 1)
+    doc.paragraphs[-1].paragraph_format.space_after = Pt(15)
     for toc_title, page, indent in (
         ("Abstract", 3, 0),
         ("1 Problem Definition", 3, 0),

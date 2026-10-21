@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "SOC: Configure",
+      "type": "process",
+      "command": "/bin/zsh",
+      "args": ["-lc", "cmake -S . -B build"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "SOC: Build",
+      "type": "process",
+      "command": "/bin/zsh",
+      "args": ["-lc", "cmake --build build"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": "SOC: Configure",
+      "problemMatcher": []
+    },
+    {
+      "label": "SOC: Test",
+      "type": "process",
+      "command": "/bin/zsh",
+      "args": ["-lc", "ctest --test-dir build --output-on-failure && ./build/soc_tests"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": "SOC: Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "SOC: Demo",
+      "type": "process",
+      "command": "/bin/zsh",
+      "args": ["-lc", "./build/soc_cli data/presentation_events.csv"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": "SOC: Build",
+      "problemMatcher": []
+    }
+  ]
+}

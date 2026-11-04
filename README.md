@@ -30,6 +30,8 @@ The [final project report](docs/FINAL_REPORT.md) summarizes the design, verifica
 An [editable Word version](docs/SOC_Alert_Correlation_Final_Report.docx) is included for submission; `scripts/create_final_report.py` rebuilds it from the Markdown report.
 Use the [final demo guide](docs/FINAL_DEMO_GUIDE.md) for a short classroom walkthrough.
 
+For Vercel, import this repository as an **Other** framework project. `vercel.json` serves only the static `web/` directory and opens the dashboard at `/`. The hosted page starts with the small synthetic presentation example; analysts can load a locally generated JSON result in the browser.
+
 The rendered and visually verified midterm submission is available as [SOC Alert Correlation Midterm Report](docs/SOC_Alert_Correlation_Midterm_Report.docx). Its reproducible generator is checked in under `scripts/create_midterm_report.py`.
 
 ## Build

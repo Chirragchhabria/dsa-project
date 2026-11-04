@@ -30,7 +30,7 @@ The [final project report](docs/FINAL_REPORT.md) summarizes the design, verifica
 An [editable Word version](docs/SOC_Alert_Correlation_Final_Report.docx) is included for submission; `scripts/create_final_report.py` rebuilds it from the Markdown report.
 Use the [final demo guide](docs/FINAL_DEMO_GUIDE.md) for a short classroom walkthrough.
 
-For Vercel, import this repository as an **Other** framework project. `vercel.json` serves only the static `web/` directory and opens the dashboard at `/`. The hosted page starts with the 19-event synthetic presentation example and explains that the separate 10,000-flow CIDDS analysis stays local. On this machine, choose **Open analysis JSON** and select `data/external/cidds_result.json` to inspect all 61 incidents in the browser.
+For Vercel, import this repository as an **Other** framework project. `vercel.json` serves only the static `web/` directory and opens a public aggregate overview of the 10,000-flow CIDDS run at `/`. It lists all 61 incidents by score, priority, size, and activity without publishing individual source records. The 19-event guided dashboard remains at `/demo.html`. On this machine, choose **Open analysis JSON** there and select `data/external/cidds_result.json` to inspect the full local result. Rebuild the public overview with `python3 scripts/render_public_overview.py data/external/cidds_result.json data/external/cidds_evaluation.json web/overview.html`.
 
 The rendered and visually verified midterm submission is available as [SOC Alert Correlation Midterm Report](docs/SOC_Alert_Correlation_Midterm_Report.docx). Its reproducible generator is checked in under `scripts/create_midterm_report.py`.
 

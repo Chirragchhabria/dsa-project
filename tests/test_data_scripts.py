@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from evaluate import measure_groups
 from prepare_cidds import MEMBER, sample
 from render_dashboard import render
+from render_public_overview import render as render_public_overview
 
 
 with tempfile.TemporaryDirectory() as directory:
@@ -53,4 +54,19 @@ with tempfile.TemporaryDirectory() as directory:
         raise AssertionError("overwriting input should fail")
     except ValueError:
         pass
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory)
+    result = root / "result.json"
+    evaluation = root / "evaluation.json"
+    overview = root / "overview.html"
+    result.write_text('''{"schema_version":2,"summary":{"events_loaded":2,"events_rejected":0},
+      "incidents":[{"id":"INC-0001","risk_score":80,"priority":"CRITICAL",
+      "events":[{"id":"SECRET-1","type":"PORT_SCAN","source_ip":"192.0.2.1"},
+                {"id":"SECRET-2","type":"PORT_SCAN","source_ip":"192.0.2.2"}]}]}''')
+    evaluation.write_text('{"events":2,"incidents":1,"pairwise_precision":1,"pairwise_recall":1}')
+    render_public_overview(result, evaluation, overview)
+    html = overview.read_text()
+    assert '"loaded":2' in html and '"events":2' in html
+    assert 'INC-0001' in html and 'Reconnaissance' in html
+    assert 'SECRET-' not in html and '192.0.2.' not in html
 print("data script checks passed")

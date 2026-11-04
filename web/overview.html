@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>10,000-flow study · SOC Correlation</title>
+  <style>
+    :root { --paper:#f3f0e9; --surface:#fffdf8; --ink:#15242b; --muted:#526168; --line:#c7cec9; --rust:#7e2e12; --focus:#1b657e; }
+    * { box-sizing:border-box; }
+    html { background:var(--paper); scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--paper); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    ::selection { background:#d8e9e6; color:var(--ink); }
+    a { color:inherit; text-underline-offset:3px; }
+    a:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .skip { position:absolute; left:-10000px; top:8px; background:var(--surface); padding:8px; z-index:2; }
+    .skip:focus { left:8px; }
+    .masthead { background:var(--ink); color:#f5f2e9; padding:22px clamp(20px,4vw,60px) 52px; }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .brand { font-size:13px; letter-spacing:.12em; font-weight:700; text-transform:uppercase; }
+    .top a { border:1px solid #81969a; border-radius:6px; padding:8px 12px; text-decoration:none; font-size:13px; font-weight:600; }
+    .top a:hover { background:#294149; }
+    .masthead h1 { max-width:850px; margin:55px 0 12px; font:400 clamp(38px,5.5vw,72px)/1.05 Georgia,serif; letter-spacing:-.025em; }
+    .masthead p { max-width:70ch; color:#c8d3d0; margin:0; }
+    .masthead .source { margin-top:15px; font-size:13px; }
+    main { max-width:1320px; margin:auto; padding:0 clamp(20px,4vw,60px) 80px; }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; margin-top:-26px; background:var(--surface); box-shadow:0 8px 24px rgba(10,32,37,.09); border-radius:10px; overflow:hidden; }
+    .metric { padding:23px 24px 21px; border-right:1px solid var(--line); }
+    .metric:last-child { border-right:0; }
+    .metric strong { display:block; font:400 clamp(31px,3.2vw,45px)/1.1 Georgia,serif; font-variant-numeric:tabular-nums; }
+    .metric span { display:block; margin-top:6px; color:var(--muted); font-size:13px; }
+    .intro { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:55px; padding:55px 0 48px; border-bottom:1px solid var(--line); }
+    h2 { font:400 clamp(27px,3vw,38px)/1.13 Georgia,serif; letter-spacing:-.02em; margin:0 0 12px; }
+    .intro p { max-width:67ch; margin:0 0 12px; }
+    .context { color:var(--muted); }
+    .distribution { align-self:start; }
+    .distribution h2 { font-size:25px; }
+    .distribution dl { margin:0; }
+    .distribution div { display:flex; justify-content:space-between; gap:25px; padding:10px 0; border-bottom:1px solid var(--line); }
+    .distribution dt { color:var(--muted); }
+    .distribution dd { margin:0; font-weight:700; font-variant-numeric:tabular-nums; }
+    .incidents { padding-top:46px; }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:24px; margin-bottom:18px; }
+    .section-head p { color:var(--muted); margin:0; }
+    .controls { display:flex; gap:8px; }
+    input, select { height:40px; border:1px solid #aeb9b3; border-radius:6px; background:var(--surface); color:var(--ink); padding:0 10px; font:inherit; }
+    input { min-width:200px; }
+    input::placeholder { color:#66766e; opacity:1; }
+    .table-wrap { overflow-x:auto; background:var(--surface); border-radius:8px; }
+    table { border-collapse:collapse; width:100%; min-width:590px; }
+    th, td { padding:12px 16px; text-align:left; border-bottom:1px solid #e2e6e0; }
+    th { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:#e9ede7; }
+    tbody tr:last-child td { border-bottom:0; }
+    tbody tr:hover { background:#f4f6f0; }
+    td:nth-child(2), td:nth-child(4) { font-variant-numeric:tabular-nums; }
+    .tag { font-size:11px; font-weight:750; letter-spacing:.05em; border-radius:3px; padding:3px 7px; background:#e5ebe3; color:#345248; }
+    .tag.CRITICAL { background:#f8e8df; color:var(--rust); }
+    .tag.HIGH { background:#f5ead8; color:#70400d; }
+    .empty { padding:24px; color:var(--muted); }
+    .foot { color:var(--muted); font-size:13px; margin-top:28px; max-width:75ch; }
+    @media (max-width:800px) { .metrics { grid-template-columns:repeat(2,1fr); } .metric:nth-child(2) { border-right:0; } .metric:nth-child(-n+2) { border-bottom:1px solid var(--line); } .intro { grid-template-columns:1fr; gap:30px; } }
+    @media (max-width:650px) { .masthead { padding-bottom:47px; } .masthead h1 { margin-top:45px; } .section-head { display:block; } .controls { margin-top:17px; } input { min-width:0; width:100%; } .metrics { margin-top:-21px; } .metric { padding:17px; } .top { align-items:start; } .top a { white-space:nowrap; } }
+  </style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to results</a>
+<header class="masthead">
+  <div class="top"><div class="brand">SOC Correlation</div><a href="/demo.html">Open incident demo</a></div>
+  <h1>10,000 flows. One review queue.</h1>
+  <p>A published summary of our CIDDS-001 evaluation. The C++ engine grouped related network flows into incidents and ranked them for review.</p>
+  <p class="source">Source: <a href="https://www.hs-coburg.de/forschen/cidds-coburg-intrusion-detection-data-sets/">Hochschule Coburg CIDDS-001</a> · 5,000 normal and 5,000 attack-labeled flows sampled from internal week 1</p>
+</header>
+<main id="main">
+  <section class="metrics" aria-label="Evaluation totals">
+    <div class="metric"><strong id="loaded"></strong><span>flows processed</span></div>
+    <div class="metric"><strong id="incidents"></strong><span>incidents formed</span></div>
+    <div class="metric"><strong id="clustered"></strong><span>flows in reported incidents</span></div>
+    <div class="metric"><strong id="rejected"></strong><span>rows rejected</span></div>
+  </section>
+  <section class="intro">
+    <div><h2>What the 10,000-flow run shows</h2>
+      <p>The list below contains aggregate details for every incident: priority, score, event count, and activity family. Search or filter to inspect the distribution.</p>
+      <p class="context">Individual flow records and IP addresses are not hosted here. To see event timelines and score reasons, open the <a href="/demo.html">incident dashboard</a> and load your local <code>cidds_result.json</code>.</p>
+      <p class="context">These are network flows from a simulated environment, not native SOC alerts. The scores are review heuristics, not attack probabilities.</p>
+    </div>
+    <div class="distribution"><h2>Priority mix</h2><dl id="priority-mix"></dl><p class="context">Pairwise grouping on this balanced sample: <strong id="precision"></strong> precision and <strong id="recall"></strong> recall against publisher AttackIDs. <a href="https://github.com/Chirragchhabria/dsa-project/blob/master/docs/EXTERNAL_EVALUATION.md">Read the evaluation limits</a>.</p></div>
+  </section>
+  <section class="incidents" aria-labelledby="incidents-title">
+    <div class="section-head"><div><h2 id="incidents-title">Incident aggregates</h2><p id="match-count" aria-live="polite"></p></div><div class="controls"><input id="search" type="search" placeholder="Find incident or activity" aria-label="Find incident or activity"><select id="priority" aria-label="Filter priority"><option value="">All priorities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option></select></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Incident</th><th>Score</th><th>Priority</th><th>Flows</th><th>Activity</th></tr></thead><tbody id="rows"></tbody></table><p id="empty" class="empty" hidden>No incidents match these filters.</p></div>
+    <p class="foot">CIDDS-001: Ring, M., Wunderlich, S., Gruedl, D., Landes, D., Hotho, A. “Flow-based benchmark data sets for intrusion detection.” ECCWS, 2017. The source records are available from the publisher.</p>
+  </section>
+</main>
+<script id="overview-data" type="application/json">{"loaded":10000,"rejected":0,"incidents":61,"clustered":4901,"priorities":{"CRITICAL":24,"HIGH":9,"MEDIUM":28},"precision":1.0,"recall":0.997128267376027,"rows":[{"id":"INC-0009","score":100,"priority":"CRITICAL","events":131,"activity":"DoS"},{"id":"INC-0010","score":100,"priority":"CRITICAL","events":257,"activity":"DoS"},{"id":"INC-0011","score":100,"priority":"CRITICAL","events":17,"activity":"Reconnaissance"},{"id":"INC-0012","score":100,"priority":"CRITICAL","events":127,"activity":"DoS"},{"id":"INC-0019","score":100,"priority":"CRITICAL","events":24,"activity":"Reconnaissance"},{"id":"INC-0020","score":100,"priority":"CRITICAL","events":144,"activity":"DoS"},{"id":"INC-0022","score":100,"priority":"CRITICAL","events":64,"activity":"Reconnaissance"},{"id":"INC-0025","score":100,"priority":"CRITICAL","events":43,"activity":"Reconnaissance"},{"id":"INC-0038","score":100,"priority":"CRITICAL","events":862,"activity":"DoS"},{"id":"INC-0039","score":100,"priority":"CRITICAL","events":51,"activity":"Reconnaissance"},{"id":"INC-0040","score":100,"priority":"CRITICAL","events":1054,"activity":"DoS"},{"id":"INC-0042","score":100,"priority":"CRITICAL","events":28,"activity":"Reconnaissance"},{"id":"INC-0043","score":100,"priority":"CRITICAL","events":37,"activity":"Reconnaissance"},{"id":"INC-0044","score":100,"priority":"CRITICAL","events":20,"activity":"Reconnaissance"},{"id":"INC-0046","score":100,"priority":"CRITICAL","events":265,"activity":"DoS"},{"id":"INC-0048","score":100,"priority":"CRITICAL","events":245,"activity":"DoS"},{"id":"INC-0049","score":100,"priority":"CRITICAL","events":131,"activity":"DoS"},{"id":"INC-0050","score":100,"priority":"CRITICAL","events":71,"activity":"Reconnaissance"},{"id":"INC-0051","score":100,"priority":"CRITICAL","events":449,"activity":"DoS"},{"id":"INC-0058","score":100,"priority":"CRITICAL","events":80,"activity":"Reconnaissance"},{"id":"INC-0060","score":100,"priority":"CRITICAL","events":32,"activity":"Reconnaissance"},{"id":"INC-0061","score":100,"priority":"CRITICAL","events":661,"activity":"DoS"},{"id":"INC-0059","score":96,"priority":"CRITICAL","events":7,"activity":"Reconnaissance"},{"id":"INC-0034","score":82,"priority":"CRITICAL","events":6,"activity":"Reconnaissance"},{"id":"INC-0029","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance"},{"id":"INC-0031","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance"},{"id":"INC-0041","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance"},{"id":"INC-0045","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance"},{"id":"INC-0047","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance"},{"id":"INC-0027","score":54,"priority":"HIGH","events":4,"activity":"Reconnaissance"},{"id":"INC-0024","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance"},{"id":"INC-0028","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance"},{"id":"INC-0055","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance"},{"id":"INC-0008","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance"},{"id":"INC-0016","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance"},{"id":"INC-0030","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance"},{"id":"INC-0001","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0002","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0003","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0004","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0005","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0006","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0007","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0013","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0014","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0015","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0017","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0018","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0021","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0023","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0026","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0032","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0033","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0035","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0036","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0037","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0052","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0053","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0054","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0056","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0057","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"}]}</script>
+<script>
+  const data = JSON.parse(document.getElementById('overview-data').textContent);
+  const byId = id => document.getElementById(id);
+  const number = value => value.toLocaleString('en-US');
+  for (const key of ['loaded', 'incidents', 'clustered', 'rejected']) byId(key).textContent = number(data[key]);
+  byId('precision').textContent = data.precision.toFixed(3);
+  byId('recall').textContent = data.recall.toFixed(3);
+  for (const priority of ['CRITICAL', 'HIGH', 'MEDIUM']) {
+    const item = document.createElement('div');
+    const label = document.createElement('dt');
+    const value = document.createElement('dd');
+    label.textContent = priority;
+    value.textContent = number(data.priorities[priority] || 0);
+    item.append(label, value);
+    byId('priority-mix').append(item);
+  }
+  function render() {
+    const query = byId('search').value.trim().toLowerCase();
+    const priority = byId('priority').value;
+    const rows = data.rows.filter(row => (!priority || row.priority === priority) &&
+      (!query || [row.id, row.activity, row.priority].some(value => value.toLowerCase().includes(query))));
+    const body = byId('rows');
+    body.replaceChildren();
+    for (const row of rows) {
+      const tr = document.createElement('tr');
+      for (const value of [row.id, row.score + ' / 100', row.priority, number(row.events), row.activity]) {
+        const td = document.createElement('td');
+        if (value === row.priority) {
+          const badge = document.createElement('span');
+          badge.className = 'tag ' + row.priority;
+          badge.textContent = value;
+          td.append(badge);
+        } else td.textContent = value;
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+    byId('match-count').textContent = rows.length + ' of ' + data.rows.length + ' incidents shown';
+    byId('empty').hidden = rows.length > 0;
+  }
+  byId('search').addEventListener('input', render);
+  byId('priority').addEventListener('change', render);
+  render();
+</script>
+</body>
+</html>

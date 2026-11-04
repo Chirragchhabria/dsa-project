@@ -1,5 +1,7 @@
 # Incident review visual system
 
+The Vercel root now serves `web/overview.html`, an aggregate CIDDS study view using the same palette and type as the offline dashboard. Its masthead and four measured totals lead to a priority breakdown and a searchable 61-row incident table. It contains scores, counts, and activity families but no source flow records, addresses, or event timelines. The existing `web/demo.html` remains the detailed 19-event guided example and local JSON viewer.
+
 This records the shipped offline dashboard in `web/template.html` and its generated example, `web/demo.html`. The view presents the CLI's incident JSON for a classroom review; the score is a review heuristic, not a production detection claim.
 
 ## Color and type

@@ -3,6 +3,6 @@
   "framework": null,
   "outputDirectory": "web",
   "rewrites": [
-    { "source": "/", "destination": "/demo.html" }
+    { "source": "/", "destination": "/overview.html" }
   ]
 }

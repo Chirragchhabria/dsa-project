@@ -38,6 +38,8 @@
     .masthead p { margin: 0; max-width: 72ch; color: #c8d3d0; }
     .statusline { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 24px; padding-top: 16px; border-top: 1px solid #52676a; color: #e0e7e1; font-size: 13px; }
     .statusline strong { color: #fff; font-variant-numeric: tabular-nums; font-size: 17px; padding-right: 5px; }
+    .dataset-note { margin-top: 14px; max-width: 90ch; color: #dbe6df; font-size: 13px; }
+    .dataset-note a { color: #fff; text-underline-offset: 3px; }
     .layout { display: grid; grid-template-columns: minmax(290px, 355px) minmax(0, 1fr); min-height: 0; min-width: 0; }
     .queue { min-width: 0; border-right: 1px solid var(--line); background: #eaece6; padding: 25px 18px 35px clamp(18px, 2vw, 34px); }
     .queue-head h2, .case-head h2 { font-family: Georgia, serif; font-weight: 400; letter-spacing: -.02em; }
@@ -130,6 +132,7 @@
     <h1>Incident review</h1>
     <p>Trace related events, inspect the score, and work through the priority queue. Results reflect the selected input and correlation policy.</p>
     <div id="status" class="statusline" aria-live="polite"></div>
+    <p id="dataset-note" class="dataset-note"></p>
     <div id="load-errors"></div>
     <p id="error" class="error" role="alert"></p>
   </header>
@@ -250,6 +253,16 @@
     addMetric(status, data.summary.events_loaded, ' events loaded');
     addMetric(status, data.summary.events_rejected, ' rejected');
     addMetric(status, data.summary.incidents, ' incidents');
+    const note = $('dataset-note');
+    note.replaceChildren();
+    if (data.input === 'data/presentation_events.csv' && data.summary.events_loaded === 19) {
+      note.append(document.createTextNode('This is the 19-event guided example. The separate CIDDS-001 run processed 10,000 flows and found 61 incidents. Its record-level JSON is not hosted; if you have the local result, choose Open analysis JSON to inspect it. '));
+      const link = node('a', '', 'View the 10,000-flow evaluation');
+      link.href = 'https://github.com/Chirragchhabria/dsa-project/blob/master/docs/EXTERNAL_EVALUATION.md';
+      note.append(link);
+    } else {
+      note.textContent = 'Showing the analysis JSON loaded from your device.';
+    }
     const errors = $('load-errors');
     errors.replaceChildren();
     if (data.errors?.length) {

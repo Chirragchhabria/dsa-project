@@ -1,6 +1,7 @@
 # Scripts
 
 - `create_midterm_report.py` rebuilds the historical editable Word midterm report.
+- `create_final_report.py` rebuilds the editable Word final report from `docs/FINAL_REPORT.md` (requires `python-docx`).
 - `generate_dataset.py` writes reproducible labeled synthetic alerts. Example: `python3 scripts/generate_dataset.py /tmp/soc-events.csv --incidents 100 --noise 1000 --seed 42`.
 - `evaluate.py` runs the CLI on a labeled CSV and reports pairwise incident precision, recall, F1, per-scenario missed joins and mixed-label pairs, and labeled attack-event coverage at ranks 5/10/20. Example: `python3 scripts/evaluate.py data/presentation_events.csv`. Labels `normal` and `unrelated` are treated as negative examples; other matching labels define true incident pairs. Rank coverage is a triage diagnostic, not a severity-ranking accuracy measure.
 - `prepare_cidds.py` samples 5,000 normal and 5,000 AttackID-labeled flows from the publisher's CIDDS-001 internal week 1. It reads the ZIP with HTTP ranges or accepts a local archive using `--zip`. Example: `python3 scripts/prepare_cidds.py data/external/cidds_10000.csv`.

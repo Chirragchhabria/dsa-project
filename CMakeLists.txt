@@ -35,4 +35,6 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME soc_cli_integration
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_cli.py
                 $<TARGET_FILE:soc_cli> ${CMAKE_SOURCE_DIR}/data/presentation_events.csv)
+    add_test(NAME soc_data_scripts
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_data_scripts.py)
 endif()

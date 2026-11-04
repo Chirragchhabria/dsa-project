@@ -67,18 +67,6 @@ std::vector<std::string> EntityGraph::dfs(const std::string& start) const {
     return order;
 }
 
-void EntityGraph::eventDfsRecursive(const std::string& node,
-                                    std::unordered_set<std::string>& visited,
-                                    std::vector<std::string>& component) const {
-    visited.insert(node);
-    component.push_back(node.substr(6));
-    for (const auto& neighbor : adjacency_.at(node)) {
-        if (neighbor.rfind("event:", 0) == 0 && visited.count(neighbor) == 0) {
-            eventDfsRecursive(neighbor, visited, component);
-        }
-    }
-}
-
 std::vector<std::vector<std::string>> EntityGraph::eventComponents() const {
     std::vector<std::string> eventNodes;
     for (const auto& [node, ignored] : adjacency_) {
@@ -92,7 +80,18 @@ std::vector<std::vector<std::string>> EntityGraph::eventComponents() const {
     for (const auto& node : eventNodes) {
         if (visited.count(node) != 0) continue;
         std::vector<std::string> component;
-        eventDfsRecursive(node, visited, component);
+        std::vector<std::string> pending{node};
+        visited.insert(node);
+        while (!pending.empty()) {
+            const auto current = pending.back();
+            pending.pop_back();
+            component.push_back(current.substr(6));
+            for (const auto& neighbor : adjacency_.at(current)) {
+                if (neighbor.rfind("event:", 0) == 0 && visited.insert(neighbor).second) {
+                    pending.push_back(neighbor);
+                }
+            }
+        }
         std::sort(component.begin(), component.end());
         components.push_back(std::move(component));
     }

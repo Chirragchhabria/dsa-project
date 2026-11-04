@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Incident Review · SOC Correlation</title>
+  <style>
+    :root {
+      --paper: #f3f0e9;
+      --surface: #fffdf8;
+      --ink: #15242b;
+      --muted: #526168;
+      --line: #c7cec9;
+      --accent: #ae431c;
+      --accent-soft: #f8e8df;
+      --high: #8a5121;
+      --medium: #516c5f;
+      --focus: #1b657e;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--paper); }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    ::selection { background: #d8e9e6; color: var(--ink); }
+    button, input, select { font: inherit; }
+    button, select, input[type="search"] { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .shell { min-height: 100vh; width: 100%; min-width: 0; display: grid; grid-template-rows: auto 1fr; }
+    .masthead { background: var(--ink); color: #f5f2e9; padding: 22px clamp(20px, 3vw, 50px) 25px; }
+    .masthead-top { display: flex; gap: 20px; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: baseline; gap: 15px; font-size: 13px; letter-spacing: .12em; font-weight: 700; text-transform: uppercase; }
+    .brand-mark { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 1px solid #a5b6b5; border-radius: 50%; font-family: Georgia, serif; font-size: 19px; line-height: 1; letter-spacing: 0; }
+    .file-action { display: inline-flex; gap: 10px; align-items: center; cursor: pointer; border: 1px solid #81969a; border-radius: 6px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+    .file-action:hover { background: #294149; }
+    .file-action input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .file-action:focus-within { outline: 3px solid #8ac4d4; outline-offset: 3px; }
+    .masthead h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(34px, 4vw, 58px); letter-spacing: -.025em; line-height: 1.08; margin: 27px 0 8px; }
+    .masthead p { margin: 0; max-width: 72ch; color: #c8d3d0; }
+    .statusline { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 24px; padding-top: 16px; border-top: 1px solid #52676a; color: #e0e7e1; font-size: 13px; }
+    .statusline strong { color: #fff; font-variant-numeric: tabular-nums; font-size: 17px; padding-right: 5px; }
+    .layout { display: grid; grid-template-columns: minmax(290px, 355px) minmax(0, 1fr); min-height: 0; min-width: 0; }
+    .queue { min-width: 0; border-right: 1px solid var(--line); background: #eaece6; padding: 25px 18px 35px clamp(18px, 2vw, 34px); }
+    .queue-head h2, .case-head h2 { font-family: Georgia, serif; font-weight: 400; letter-spacing: -.02em; }
+    .queue-head h2 { font-size: 29px; margin: 0 0 2px; }
+    .queue-head p { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+    .controls { display: grid; grid-template-columns: minmax(0,1fr) 116px; gap: 8px; margin-bottom: 16px; }
+    .controls input, .controls select { width: 100%; height: 40px; border: 1px solid #aeb9b3; border-radius: 6px; background: var(--surface); padding: 0 10px; }
+    .controls input::placeholder { color: #66766e; opacity: 1; }
+    .queue-list { display: grid; gap: 7px; min-width: 0; }
+    .queue-hint { display: none; margin: -7px 0 12px; color: var(--muted); font-size: 12px; }
+    .incident-button { width: 100%; text-align: left; cursor: pointer; padding: 12px 13px; background: transparent; border: 1px solid transparent; border-radius: 8px; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; }
+    .incident-button:hover { background: #f6f7f1; border-color: #cbd4ca; }
+    .incident-button[aria-current="true"] { background: var(--surface); border-color: #799095; box-shadow: 0 3px 10px rgba(10, 32, 37, .09); }
+    .incident-id { font-weight: 750; letter-spacing: .025em; }
+    .incident-meta { color: var(--muted); font-size: 12px; grid-column: 1 / -1; }
+    .score { font-weight: 750; font-variant-numeric: tabular-nums; }
+    .score small { font-size: 11px; font-weight: 500; color: var(--muted); }
+    .empty { padding: 22px; border: 1px dashed #9eaaa3; border-radius: 8px; color: var(--muted); }
+    .case { padding: clamp(24px, 3.2vw, 56px); min-width: 0; }
+    .case-inner { max-width: 1080px; margin: 0 auto; }
+    .case-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); padding-bottom: 23px; }
+    .case-head h2 { margin: 0 0 5px; font-size: clamp(35px, 4vw, 54px); line-height: 1.08; }
+    .case-subtitle { margin: 0; color: var(--muted); }
+    .risk { min-width: 116px; text-align: right; font-variant-numeric: tabular-nums; }
+    .risk strong { font-family: Georgia, serif; font-size: 50px; line-height: 1; font-weight: 400; display: block; }
+    .risk span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    .priority { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 750; border-radius: 3px; padding: 3px 7px; background: #e2e8e4; color: #304239; }
+    .priority.CRITICAL { background: var(--accent-soft); color: #7e2e12; }
+    .priority.HIGH { background: #f5ead8; color: #70400d; }
+    .priority.MEDIUM { background: #e5ebe3; color: #345248; }
+    .case-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(235px, .75fr); gap: clamp(25px, 3vw, 50px); padding-top: 29px; }
+    h3 { font-family: Georgia, serif; font-size: 25px; font-weight: 400; letter-spacing: -.015em; margin: 0 0 15px; }
+    .section-note { margin: -8px 0 18px; color: var(--muted); font-size: 13px; }
+    .timeline { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+    .timeline li { border-bottom: 1px solid var(--line); padding: 16px 0 17px 22px; position: relative; }
+    .timeline li::before { content: ""; position: absolute; width: 8px; height: 8px; top: 22px; left: 1px; border: 2px solid var(--medium); border-radius: 50%; background: var(--surface); }
+    .timeline li::after { content: ""; position: absolute; left: 5px; top: 34px; bottom: -21px; width: 1px; background: var(--line); }
+    .timeline li:last-child::after { display: none; }
+    .event-line { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+    .event-type { font-weight: 700; font-size: 13px; overflow-wrap: anywhere; }
+    .event-id { color: var(--muted); font-size: 12px; }
+    .event-time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; margin: 2px 0 5px; }
+    .event-description { margin: 0 0 7px; overflow-wrap: anywhere; }
+    .entities { display: flex; flex-wrap: wrap; gap: 5px; }
+    .entity { font: 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 3px 5px; background: #e9eeeb; border-radius: 3px; overflow-wrap: anywhere; }
+    .evidence { background: #e9ede7; border-radius: 10px; padding: 18px 19px; align-self: start; }
+    .evidence h3 { margin-bottom: 5px; }
+    .evidence p { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+    .evidence ul { margin: 0; padding-left: 18px; font-size: 13px; }
+    .evidence li { padding: 5px 0; }
+    .policy { margin-top: 19px; padding-top: 17px; border-top: 1px solid var(--line); }
+    .policy strong { font-size: 13px; }
+    .policy p { margin-top: 5px; }
+    .error { margin: 15px 0 0; color: #ffd9c8; font-size: 13px; min-height: 1.5em; }
+    .load-errors { margin-top: 12px; color: #f5d6c4; font-size: 13px; }
+    .load-errors summary { cursor: pointer; }
+    .load-errors ul { margin: 7px 0 0; padding-left: 20px; }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      .queue { border-right: 0; border-bottom: 1px solid var(--line); padding: 22px; }
+      .queue-list { display: flex; overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
+      .queue-hint { display: block; }
+      .incident-button { flex: 0 0 205px; }
+      .case { padding: 28px 22px 45px; }
+    }
+    @media (max-width: 620px) {
+      .masthead { padding: 18px 20px 22px; }
+      .masthead h1 { margin-top: 25px; }
+      .statusline { gap: 8px 18px; }
+      .case-grid { grid-template-columns: 1fr; }
+      .case-head { align-items: flex-start; }
+      .risk { min-width: 80px; }
+      .risk strong { font-size: 40px; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .incident-button { transition: background .18s ease, box-shadow .18s ease; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div class="masthead-top">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">S</span> SOC Correlation</div>
+      <label class="file-action">Open analysis JSON <input id="file" type="file" accept=".json,application/json" aria-label="Open analysis JSON"></label>
+    </div>
+    <h1>Incident review</h1>
+    <p>Trace related events, inspect the score, and work through the priority queue. Results reflect the selected input and correlation policy.</p>
+    <div id="status" class="statusline" aria-live="polite"></div>
+    <div id="load-errors"></div>
+    <p id="error" class="error" role="alert"></p>
+  </header>
+  <div class="layout">
+    <aside class="queue" aria-label="Incident queue">
+      <div class="queue-head"><h2>Review queue</h2><p>Highest risk score first</p></div>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Find event or entity" aria-label="Find event or entity">
+        <select id="priority" aria-label="Filter priority"><option value="">All priorities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option><option>INFORMATIONAL</option></select>
+      </div>
+      <p id="queue-hint" class="queue-hint"></p>
+      <div id="queue-list" class="queue-list"></div>
+    </aside>
+    <main class="case" id="case" tabindex="-1"><div class="case-inner" id="case-inner"></div></main>
+  </div>
+</div>
+<script id="initial-data" type="application/json">__INCIDENT_JSON__</script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const state = { data: null, selected: null };
+  const node = (tag, className, value) => {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (value !== undefined) element.textContent = String(value);
+    return element;
+  };
+  const date = seconds => new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium', timeStyle: 'medium', timeZone: 'UTC'
+  }).format(new Date(seconds * 1000)) + ' UTC';
+  const addMetric = (target, number, label) => {
+    const item = node('span');
+    item.append(node('strong', '', number), document.createTextNode(label));
+    target.append(item);
+  };
+  const matches = (incident, query) => {
+    if (!query) return true;
+    const values = [incident.id, incident.priority, ...incident.events.flatMap(event =>
+      [event.id, event.type, event.description, event.source_ip, event.destination_ip,
+       event.username, event.hostname])];
+    return values.some(value => String(value || '').toLowerCase().includes(query));
+  };
+  const showCase = incident => {
+    const target = $('case-inner');
+    target.replaceChildren();
+    if (!incident) {
+      target.append(node('p', 'empty', 'No incidents match this filter. Clear the search or choose another priority.'));
+      return;
+    }
+    const head = node('div', 'case-head');
+    const titleBlock = node('div');
+    titleBlock.append(node('h2', '', incident.id));
+    titleBlock.append(node('span', 'priority ' + incident.priority, incident.priority));
+    titleBlock.append(node('p', 'case-subtitle', incident.events.length + ' events · ' +
+      date(incident.start_timestamp) + ' – ' + date(incident.end_timestamp)));
+    const risk = node('div', 'risk');
+    risk.append(node('strong', '', incident.risk_score), node('span', '', 'score / 100'));
+    head.append(titleBlock, risk);
+    target.append(head);
+    const grid = node('div', 'case-grid');
+    const main = node('section');
+    main.append(node('h3', '', 'Event timeline'),
+      node('p', 'section-note', 'Ordered by the timestamp in the source CSV.'));
+    const timeline = node('ol', 'timeline');
+    for (const event of incident.events) {
+      const item = node('li');
+      const line = node('div', 'event-line');
+      line.append(node('span', 'event-type', event.type.replaceAll('_', ' ')),
+        node('span', 'event-id', event.id));
+      item.append(line, node('p', 'event-time', date(event.timestamp)));
+      if (event.description) item.append(node('p', 'event-description', event.description));
+      const entities = node('div', 'entities');
+      for (const [label, value] of [['src', event.source_ip], ['dst', event.destination_ip],
+                                     ['user', event.username], ['host', event.hostname]]) {
+        if (value) entities.append(node('span', 'entity', label + ' ' + value));
+      }
+      item.append(entities);
+      timeline.append(item);
+    }
+    main.append(timeline);
+    const aside = node('aside', 'evidence');
+    aside.append(node('h3', '', 'Score evidence'),
+      node('p', '', 'Deterministic reasons printed by the engine. This score is a review heuristic.'));
+    const reasons = node('ul');
+    for (const reason of incident.explanations) reasons.append(node('li', '', reason));
+    aside.append(reasons);
+    const policy = node('div', 'policy');
+    policy.append(node('strong', '', 'Correlation policy'), node('p', '',
+      'Direct links require a shared IP, user, or host; a compatible enabled activity family; and at most ' +
+      state.data.config.window_seconds + ' seconds between events. A chain can span longer overall.'));
+    aside.append(policy);
+    grid.append(main, aside);
+    target.append(grid);
+  };
+  const render = () => {
+    const data = state.data;
+    const status = $('status');
+    status.replaceChildren();
+    addMetric(status, data.summary.events_loaded, ' events loaded');
+    addMetric(status, data.summary.events_rejected, ' rejected');
+    addMetric(status, data.summary.incidents, ' incidents');
+    const errors = $('load-errors');
+    errors.replaceChildren();
+    if (data.errors?.length) {
+      const details = node('details', 'load-errors');
+      details.append(node('summary', '', 'Show ' + data.errors.length + ' rejected row details'));
+      const items = node('ul');
+      for (const message of data.errors) items.append(node('li', '', message));
+      details.append(items);
+      errors.append(details);
+    }
+    const query = $('search').value.trim().toLowerCase();
+    const priority = $('priority').value;
+    const incidents = data.incidents.filter(item => (!priority || item.priority === priority) && matches(item, query));
+    $('queue-hint').textContent = incidents.length + ' matching ' +
+      (incidents.length === 1 ? 'incident' : 'incidents') + ' · Scroll sideways to review all';
+    if (!incidents.some(item => item.id === state.selected)) state.selected = incidents[0]?.id || null;
+    const list = $('queue-list');
+    list.replaceChildren();
+    if (!incidents.length) list.append(node('p', 'empty', 'No matching incidents.'));
+    for (const item of incidents) {
+      const button = node('button', 'incident-button');
+      button.type = 'button';
+      button.setAttribute('aria-current', item.id === state.selected ? 'true' : 'false');
+      button.append(node('span', 'incident-id', item.id));
+      const score = node('span', 'score');
+      score.append(document.createTextNode(item.risk_score + ' '), node('small', '', '/ 100'));
+      button.append(score, node('span', 'incident-meta',
+        item.priority + ' · ' + item.events.length + ' events · ' + date(item.start_timestamp)));
+      button.addEventListener('click', () => { state.selected = item.id; render(); $('case').focus(); });
+      list.append(button);
+    }
+    showCase(incidents.find(item => item.id === state.selected));
+  };
+  const setData = data => {
+    const number = value => typeof value === 'number' && Number.isFinite(value);
+    const priorities = new Set(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFORMATIONAL']);
+    const validEvent = event => event && typeof event.id === 'string' &&
+      number(event.timestamp) && typeof event.type === 'string' &&
+      typeof event.severity === 'string' && typeof event.description === 'string' &&
+      ['source_ip', 'destination_ip', 'username', 'hostname'].every(key => typeof event[key] === 'string');
+    const validIncident = incident => incident && typeof incident.id === 'string' &&
+      number(incident.risk_score) && priorities.has(incident.priority) &&
+      number(incident.start_timestamp) && number(incident.end_timestamp) &&
+      Array.isArray(incident.events) && incident.events.every(validEvent) &&
+      Array.isArray(incident.explanations) && incident.explanations.every(reason => typeof reason === 'string');
+    if (!data || data.schema_version !== 2 || !Array.isArray(data.incidents) ||
+        !data.incidents.every(validIncident) || !data.summary ||
+        !['events_loaded', 'events_rejected', 'incidents'].every(key => number(data.summary[key])) ||
+        !data.config || !number(data.config.window_seconds) ||
+        (data.errors && (!Array.isArray(data.errors) ||
+                         !data.errors.every(message => typeof message === 'string')))) {
+      throw new Error('Choose a schema version 2 incident JSON file from soc_cli.');
+    }
+    state.data = data;
+    state.selected = data.incidents[0]?.id || null;
+    $('search').value = '';
+    $('priority').value = '';
+    $('error').textContent = '';
+    render();
+  };
+  $('search').addEventListener('input', render);
+  $('priority').addEventListener('change', render);
+  $('file').addEventListener('change', async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try { setData(JSON.parse(await file.text())); }
+    catch (error) { $('error').textContent = error.message || 'Could not read this JSON file.'; }
+    event.target.value = '';
+  });
+  try { setData(JSON.parse($('initial-data').textContent)); }
+  catch (error) { $('error').textContent = error.message || 'The embedded analysis could not be loaded.'; }
+})();
+</script>
+</body>
+</html>

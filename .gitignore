@@ -1,4 +1,7 @@
 /build/
+/data/external/
 .DS_Store
 *.o
+__pycache__/
+/.impeccable/
 

@@ -19,11 +19,47 @@ struct Options {
     bool json{false};
     std::int64_t window{300};
     std::size_t minimum{2};
+    unsigned int families{15};
+    std::string explainFirst;
+    std::string explainSecond;
 };
 
 void usage(std::ostream& out) {
     out << "Usage: soc_cli [CSV_PATH] [--format text|json] [--window SECONDS] [--min-events COUNT]\n"
+        << "               [--families credential,recon,exfil,dos] [--explain-pair ID1 ID2]\n"
         << "       soc_cli --help\n";
+}
+
+unsigned int parseFamilies(const std::string& value) {
+    unsigned int result = 0;
+    std::istringstream parts(value);
+    std::string part;
+    while (std::getline(parts, part, ',')) {
+        if (part == "credential") result |= 1;
+        else if (part == "recon") result |= 2;
+        else if (part == "exfil") result |= 4;
+        else if (part == "dos") result |= 8;
+        else throw std::invalid_argument("unknown family: " + part);
+    }
+    if (result == 0 || value.back() == ',') {
+        throw std::invalid_argument("--families requires one or more family names");
+    }
+    return result;
+}
+
+std::string jsonFamilies(unsigned int mask) {
+    const char* names[] = {"credential", "recon", "exfil", "dos"};
+    std::ostringstream out;
+    out << '[';
+    bool first = true;
+    for (int i = 0; i < 4; ++i) {
+        if ((mask & (1u << i)) == 0) continue;
+        if (!first) out << ',';
+        out << '"' << names[i] << '"';
+        first = false;
+    }
+    out << ']';
+    return out.str();
 }
 
 long long positiveNumber(const std::string& value, const std::string& option) {
@@ -41,7 +77,16 @@ Options parseOptions(int argc, char* argv[]) {
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--help" || arg == "-h") { usage(std::cout); std::exit(EXIT_SUCCESS); }
-        if (arg == "--format" || arg == "--window" || arg == "--min-events") {
+        if (arg == "--explain-pair") {
+            if (i + 2 >= argc) throw std::invalid_argument("--explain-pair requires two event IDs");
+            options.explainFirst = argv[++i];
+            options.explainSecond = argv[++i];
+            if (options.explainFirst.empty() || options.explainSecond.empty() ||
+                options.explainFirst == options.explainSecond) {
+                throw std::invalid_argument("--explain-pair requires two distinct event IDs");
+            }
+        } else if (arg == "--format" || arg == "--window" || arg == "--min-events" ||
+                   arg == "--families") {
             if (++i >= argc) throw std::invalid_argument("missing value for " + arg);
             const std::string value = argv[i];
             if (arg == "--format") {
@@ -49,9 +94,11 @@ Options parseOptions(int argc, char* argv[]) {
                 options.json = value == "json";
             } else if (arg == "--window") {
                 options.window = positiveNumber(value, arg);
-            } else {
+            } else if (arg == "--min-events") {
                 options.minimum = positiveNumber(value, arg);
                 if (options.minimum < 2) throw std::invalid_argument("--min-events must be at least 2");
+            } else {
+                options.families = parseFamilies(value);
             }
         } else if (!arg.empty() && arg.front() == '-') {
             throw std::invalid_argument("unknown option: " + arg);
@@ -116,9 +163,10 @@ void printIncident(const soc::Incident& incident) {
 void printJson(const Options& options, const soc::LoadResult& load,
                const soc::EventManager& manager, const soc::CorrelationEngine& engine,
                const std::vector<soc::Incident>& incidents) {
-    std::cout << "{\"schema_version\":1,\"input\":" << jsonString(options.path)
+    std::cout << "{\"schema_version\":2,\"input\":" << jsonString(options.path)
               << ",\"config\":{\"window_seconds\":" << options.window
-              << ",\"minimum_incident_events\":" << options.minimum << "}"
+              << ",\"minimum_incident_events\":" << options.minimum
+              << ",\"enabled_families\":" << jsonFamilies(options.families) << "}"
               << ",\"summary\":{\"events_loaded\":" << load.loaded
               << ",\"events_rejected\":" << load.rejected
               << ",\"unique_source_ips\":" << manager.uniqueSourceIps()
@@ -150,6 +198,10 @@ void printJson(const Options& options, const soc::LoadResult& load,
                       << ",\"timestamp\":" << event.timestamp
                       << ",\"type\":" << jsonString(soc::toString(event.type))
                       << ",\"severity\":" << jsonString(soc::toString(event.severity))
+                      << ",\"source_ip\":" << jsonString(event.sourceIp)
+                      << ",\"destination_ip\":" << jsonString(event.destinationIp)
+                      << ",\"username\":" << jsonString(event.username)
+                      << ",\"hostname\":" << jsonString(event.hostname)
                       << ",\"description\":" << jsonString(event.description) << '}';
         }
         std::cout << "],\"explanations\":[";
@@ -170,7 +222,30 @@ int main(int argc, char* argv[]) {
         const Options options = parseOptions(argc, argv);
         soc::EventManager manager;
         const auto load = manager.loadCsv(options.path);
-        soc::CorrelationEngine engine({options.window, options.minimum});
+        soc::CorrelationEngine engine({options.window, options.minimum, options.families});
+        if (!options.explainFirst.empty()) {
+            const auto* first = manager.findById(options.explainFirst);
+            const auto* second = manager.findById(options.explainSecond);
+            if (!first || !second) throw std::invalid_argument("--explain-pair event ID not found in input");
+            const auto decision = engine.explainPair(*first, *second);
+            if (options.json) {
+                std::cout << "{\"schema_version\":2,\"input\":" << jsonString(options.path)
+                          << ",\"pair\":{\"first\":" << jsonString(first->id)
+                          << ",\"second\":" << jsonString(second->id)
+                          << ",\"directly_linked\":" << (decision.linked() ? "true" : "false")
+                          << ",\"within_window\":" << (decision.withinWindow ? "true" : "false")
+                          << ",\"shared_entity\":" << (decision.sharedEntity ? "true" : "false")
+                          << ",\"same_enabled_family\":" << (decision.sameEnabledFamily ? "true" : "false")
+                          << "}}\n";
+            } else {
+                std::cout << first->id << " + " << second->id << ": "
+                          << (decision.linked() ? "direct edge" : "no direct edge") << "\n"
+                          << "  Within window: " << (decision.withinWindow ? "yes" : "no") << "\n"
+                          << "  Shared entity: " << (decision.sharedEntity ? "yes" : "no") << "\n"
+                          << "  Same enabled family: " << (decision.sameEnabledFamily ? "yes" : "no") << "\n";
+            }
+            return EXIT_SUCCESS;
+        }
         auto incidents = engine.correlate(manager);
         if (options.json) {
             printJson(options, load, manager, engine, incidents);

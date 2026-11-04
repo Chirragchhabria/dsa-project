@@ -12,16 +12,42 @@ result = subprocess.run([str(binary), str(fixture), "--format", "json"],
                         check=True, text=True, capture_output=True)
 assert not result.stderr
 payload = json.loads(result.stdout)
-assert payload["schema_version"] == 1
+assert payload["schema_version"] == 2
+assert set(payload) == {"schema_version", "input", "config", "summary", "errors", "incidents"}
+assert set(payload["config"]) == {"window_seconds", "minimum_incident_events", "enabled_families"}
+assert payload["config"]["enabled_families"] == ["credential", "recon", "exfil", "dos"]
+assert set(payload["summary"]) == {"events_loaded", "events_rejected", "unique_source_ips",
+                                   "unique_users", "unique_hosts", "graph_nodes", "graph_edges", "incidents"}
 assert payload["summary"]["events_loaded"] == 19
 assert payload["summary"]["incidents"] == 3
 assert [item["risk_score"] for item in payload["incidents"]] == [100, 91, 41]
 assert [item["id"] for item in payload["incidents"]] == ["INC-0003", "INC-0001", "INC-0002"]
 assert all(item["events"] and item["explanations"] for item in payload["incidents"])
+assert all(set(item) == {"id", "risk_score", "priority", "start_timestamp", "end_timestamp",
+                         "events", "explanations"} for item in payload["incidents"])
+assert all(set(event) == {"id", "timestamp", "type", "severity", "source_ip",
+                          "destination_ip", "username", "hostname", "description"}
+           for item in payload["incidents"] for event in item["events"])
 
 changed = subprocess.run([str(binary), str(fixture), "--format", "json", "--min-events", "5"],
                          check=True, text=True, capture_output=True)
 assert json.loads(changed.stdout)["summary"]["incidents"] == 1
+
+restricted = subprocess.run([str(binary), str(fixture), "--format", "json", "--families", "credential"],
+                            check=True, text=True, capture_output=True)
+restricted_data = json.loads(restricted.stdout)
+assert restricted_data["config"]["enabled_families"] == ["credential"]
+assert restricted_data["summary"]["incidents"] == 1
+
+linked = subprocess.run([str(binary), str(fixture), "--format", "json", "--explain-pair", "AUTH-01", "AUTH-02"],
+                        check=True, text=True, capture_output=True)
+linked_pair = json.loads(linked.stdout)["pair"]
+assert linked_pair["directly_linked"]
+assert all(linked_pair[key] for key in ("within_window", "shared_entity", "same_enabled_family"))
+
+separate = subprocess.run([str(binary), str(fixture), "--format", "json", "--explain-pair", "AUTH-01", "RECON-01"],
+                          check=True, text=True, capture_output=True)
+assert not json.loads(separate.stdout)["pair"]["directly_linked"]
 
 invalid = subprocess.run([str(binary), "--window", "abc"], text=True, capture_output=True)
 assert invalid.returncode != 0 and "positive integer" in invalid.stderr

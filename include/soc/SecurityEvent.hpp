@@ -15,6 +15,7 @@ enum class EventType {
     ConnectionAttempt,
     PortScan,
     ServiceDiscovery,
+    DenialOfService,
     PrivilegedAccess,
     SensitiveFileAccess,
     OutboundConnection,

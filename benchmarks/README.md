@@ -9,3 +9,5 @@ python3 scripts/benchmark.py --binary build/soc_cli --incidents 100 --noise 1000
 ```
 
 The script generates a deterministic temporary CSV, runs the CLI repeatedly, and prints individual and median wall times with platform, binary, seed, and data size. Wall time includes process startup, CSV parsing, correlation, scoring, and JSON serialization. It does not measure memory or isolate correlation latency. Do not compare results across machines or build modes without reporting both.
+
+See [measured Release results](RESULTS.md) for a three-size run with peak resident memory on the project owner's machine.

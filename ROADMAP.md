@@ -10,19 +10,20 @@ The goal is a trustworthy, approachable open-source alert correlation engine. Po
 - Deterministic generator, labeled pairwise evaluator, and repeatable wall-time benchmark.
 - Build and test workflow on macOS, Linux, and Windows (CI runs after publication).
 
-## Next: validate correctness beyond planted examples
+## Completed for the final mini-project
 
-- Add an independently labeled, redistribution-safe dataset with a documented labeling protocol.
-- Report false merges and missed joins by scenario, plus ranking quality for analyst triage.
-- Add regression fixtures for time-boundary, transitive-chain, duplicate, malformed-input, and high-volume cases.
-- Version the JSON schema with compatibility tests before changing field meanings.
+- Added a deterministic 10,000-flow CIDDS-001 pilot using publisher AttackIDs; the derived data stays local because redistribution permission is unclear.
+- Reported false merges and missed joins by AttackID, plus attack-event coverage by incident rank. Analyst-labeled urgency is unavailable, so ranking quality remains unmeasured.
+- Added regression checks for time boundaries, transitive chains, duplicate and malformed input, indexed pair-rule equivalence, and a large connected component.
+- Advanced JSON to `schema_version: 2` for enabled families and event entities, with key-level compatibility checks.
+- Added per-entity temporal indexing and three-size Release timing and memory measurements.
+- Added selectable built-in activity families, a direct-pair explanation mode, and an offline incident-review view.
 
-## Then: scale and usability
+## Future work outside the course mini-project
 
-- Use per-entity temporal indexes to reduce candidate comparisons while preserving the present rules.
-- Measure throughput and peak memory across increasing event counts and document hardware/build settings.
-- Add configurable rule definitions and a dry-run explanation of why candidate events did or did not link.
-- Provide an interactive investigation interface after the engine and data contracts stabilize.
+- Evaluate native SOC alert datasets and analyst-labeled incident urgency.
+- Consider user-authored rule definitions when a concrete new policy is needed. The current CLI selects the four built-in families and explains direct-pair decisions.
+- Consider richer live investigation workflows after validating analyst needs. The current offline view supports search, priority filtering, and evidence review.
 
 ## Release and community
 

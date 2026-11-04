@@ -36,6 +36,7 @@ std::string toString(EventType type) {
         case EventType::ConnectionAttempt: return "CONNECTION_ATTEMPT";
         case EventType::PortScan: return "PORT_SCAN";
         case EventType::ServiceDiscovery: return "SERVICE_DISCOVERY";
+        case EventType::DenialOfService: return "DENIAL_OF_SERVICE";
         case EventType::PrivilegedAccess: return "PRIVILEGED_ACCESS";
         case EventType::SensitiveFileAccess: return "SENSITIVE_FILE_ACCESS";
         case EventType::OutboundConnection: return "OUTBOUND_CONNECTION";
@@ -65,6 +66,7 @@ EventType eventTypeFromString(const std::string& value) {
     if (key == "CONNECTION_ATTEMPT") return EventType::ConnectionAttempt;
     if (key == "PORT_SCAN") return EventType::PortScan;
     if (key == "SERVICE_DISCOVERY") return EventType::ServiceDiscovery;
+    if (key == "DENIAL_OF_SERVICE") return EventType::DenialOfService;
     if (key == "PRIVILEGED_ACCESS") return EventType::PrivilegedAccess;
     if (key == "SENSITIVE_FILE_ACCESS") return EventType::SensitiveFileAccess;
     if (key == "OUTBOUND_CONNECTION") return EventType::OutboundConnection;

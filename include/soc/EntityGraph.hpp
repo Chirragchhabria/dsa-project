@@ -30,10 +30,6 @@ private:
     void dfsRecursive(const std::string& node,
                       std::unordered_set<std::string>& visited,
                       std::vector<std::string>& order) const;
-    void eventDfsRecursive(const std::string& node,
-                           std::unordered_set<std::string>& visited,
-                           std::vector<std::string>& component) const;
-
     std::unordered_map<std::string, std::unordered_set<std::string>> adjacency_;
     std::size_t edgeCount_{0};
 };

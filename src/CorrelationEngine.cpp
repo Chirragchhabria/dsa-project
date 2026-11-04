@@ -1,11 +1,11 @@
 #include "soc/CorrelationEngine.hpp"
 
-#include "soc/SlidingWindow.hpp"
-
 #include <algorithm>
+#include <deque>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace soc {
@@ -22,6 +22,8 @@ int eventFamily(EventType type) {
         case EventType::PortScan:
         case EventType::ServiceDiscovery:
             return 2;
+        case EventType::DenialOfService:
+            return 4;
         case EventType::PrivilegedAccess:
         case EventType::SensitiveFileAccess:
         case EventType::OutboundConnection:
@@ -34,8 +36,15 @@ int eventFamily(EventType type) {
     return 0;
 }
 
-bool sameNonEmpty(const std::string& first, const std::string& second) {
-    return !first.empty() && first == second;
+std::vector<std::string> entityKeys(const SecurityEvent& event) {
+    std::vector<std::string> keys;
+    if (!event.sourceIp.empty()) keys.push_back("ip:" + event.sourceIp);
+    if (!event.destinationIp.empty() && event.destinationIp != event.sourceIp) {
+        keys.push_back("ip:" + event.destinationIp);
+    }
+    if (!event.username.empty()) keys.push_back("user:" + event.username);
+    if (!event.hostname.empty()) keys.push_back("host:" + event.hostname);
+    return keys;
 }
 
 }  // namespace
@@ -45,20 +54,31 @@ CorrelationEngine::CorrelationEngine(CorrelationConfig config) : config_(config)
     if (config_.minimumIncidentEvents < 2) {
         throw std::invalid_argument("minimum incident size must be at least two");
     }
+    if (config_.enabledFamilies == 0 || (config_.enabledFamilies & ~15u) != 0) {
+        throw std::invalid_argument("enabled families must be a nonempty subset of the four known families");
+    }
 }
 
 bool CorrelationEngine::sharesEntity(const SecurityEvent& first, const SecurityEvent& second) const {
-    const bool sharedIp = sameNonEmpty(first.sourceIp, second.sourceIp) ||
-        sameNonEmpty(first.sourceIp, second.destinationIp) ||
-        sameNonEmpty(first.destinationIp, second.sourceIp) ||
-        sameNonEmpty(first.destinationIp, second.destinationIp);
-    return sharedIp || sameNonEmpty(first.username, second.username) ||
-        sameNonEmpty(first.hostname, second.hostname);
+    const auto other = entityKeys(second);
+    for (const auto& key : entityKeys(first)) {
+        if (std::find(other.begin(), other.end(), key) != other.end()) return true;
+    }
+    return false;
 }
 
 bool CorrelationEngine::typesRelated(EventType first, EventType second) const {
     const int firstFamily = eventFamily(first);
-    return firstFamily != 0 && firstFamily == eventFamily(second);
+    return firstFamily != 0 && firstFamily == eventFamily(second) &&
+        (config_.enabledFamilies & (1u << (firstFamily - 1))) != 0;
+}
+
+PairDecision CorrelationEngine::explainPair(const SecurityEvent& first,
+                                            const SecurityEvent& second) const {
+    const auto distance = first.timestamp > second.timestamp ?
+        first.timestamp - second.timestamp : second.timestamp - first.timestamp;
+    return {distance <= config_.windowSeconds, sharesEntity(first, second),
+            typesRelated(first.type, second.type)};
 }
 
 std::vector<Incident> CorrelationEngine::correlate(const EventManager& manager) {
@@ -70,16 +90,33 @@ std::vector<Incident> CorrelationEngine::correlate(const EventManager& manager) 
         return first->timestamp < second->timestamp;
     });
 
-    SlidingWindow window(config_.windowSeconds);
+    std::unordered_map<std::string, std::deque<const SecurityEvent*>> recentByEntity;
+    std::deque<const SecurityEvent*> active;
     for (const auto* event : ordered) {
         graph_.addEventEntities(*event);
-        window.expire(event->timestamp);
-        for (const auto* candidate : window.events()) {
-            if (sharesEntity(*candidate, *event) && typesRelated(candidate->type, event->type)) {
+        while (!active.empty() && event->timestamp - active.front()->timestamp > config_.windowSeconds) {
+            for (const auto& key : entityKeys(*active.front())) {
+                auto bucket = recentByEntity.find(key);
+                bucket->second.pop_front();
+                if (bucket->second.empty()) recentByEntity.erase(bucket);
+            }
+            active.pop_front();
+        }
+        const auto keys = entityKeys(*event);
+        std::unordered_set<const SecurityEvent*> candidates;
+        for (const auto& key : keys) {
+            const auto bucket = recentByEntity.find(key);
+            if (bucket != recentByEntity.end()) {
+                candidates.insert(bucket->second.begin(), bucket->second.end());
+            }
+        }
+        for (const auto* candidate : candidates) {
+            if (typesRelated(candidate->type, event->type)) {
                 graph_.addEdge(EntityGraph::eventNode(candidate->id), EntityGraph::eventNode(event->id));
             }
         }
-        window.add(*event);
+        for (const auto& key : keys) recentByEntity[key].push_back(event);
+        active.push_back(event);
     }
 
     std::vector<std::vector<const SecurityEvent*>> correlated;

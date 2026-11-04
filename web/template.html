@@ -68,6 +68,9 @@
     .priority.CRITICAL { background: var(--accent-soft); color: #7e2e12; }
     .priority.HIGH { background: #f5ead8; color: #70400d; }
     .priority.MEDIUM { background: #e5ebe3; color: #345248; }
+    .priority-reason { padding: 18px 0 19px; border-bottom: 1px solid var(--line); }
+    .priority-reason h3 { font-size: 20px; margin: 0 0 4px; }
+    .priority-reason p { margin: 0; max-width: 75ch; color: var(--muted); }
     .case-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(235px, .75fr); gap: clamp(25px, 3vw, 50px); padding-top: 29px; }
     h3 { font-family: Georgia, serif; font-size: 25px; font-weight: 400; letter-spacing: -.015em; margin: 0 0 15px; }
     .section-note { margin: -8px 0 18px; color: var(--muted); font-size: 13px; }
@@ -187,6 +190,24 @@
     risk.append(node('strong', '', incident.risk_score), node('span', '', 'score / 100'));
     head.append(titleBlock, risk);
     target.append(head);
+    const cutoffs = { CRITICAL: 75, HIGH: 50, MEDIUM: 25, LOW: 10 };
+    const notable = [...new Set(incident.events
+      .filter(event => event.severity === 'CRITICAL' || event.severity === 'HIGH')
+      .sort((a, b) => (b.severity === 'CRITICAL') - (a.severity === 'CRITICAL'))
+      .map(event => event.type.replaceAll('_', ' ').toLowerCase()))].slice(0, 3);
+    const reason = node('section', 'priority-reason');
+    reason.append(node('h3', '', 'Why ' + incident.priority.toLowerCase() + '?'));
+    const threshold = cutoffs[incident.priority];
+    const scoreReason = threshold === undefined
+      ? 'Its ' + incident.risk_score + '/100 score is below the LOW cutoff of 10.'
+      : 'Its ' + incident.risk_score + '/100 score meets the ' + incident.priority + ' cutoff of ' + threshold + '.';
+    const signals = notable.length > 1
+      ? notable.slice(0, -1).join(', ') + ' and ' + notable.at(-1)
+      : notable[0];
+    reason.append(node('p', '', scoreReason + (notable.length
+      ? ' The timeline includes ' + signals + '. The exact score contributions are listed below.'
+      : ' The exact score contributions are listed below.')));
+    target.append(reason);
     const grid = node('div', 'case-grid');
     const main = node('section');
     main.append(node('h3', '', 'Event timeline'),

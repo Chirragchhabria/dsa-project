@@ -73,5 +73,6 @@ with tempfile.TemporaryDirectory() as directory:
     assert 'severity contribution: 24' in html and '"start":100' in html
     assert 'id="case-page"' in html and 'overview.html?incident=' in html
     assert 'Investigation and response' in html and 'Why it was ranked here' in html
+    assert 'What happened, in simple words' in html and 'checking which network services were reachable' in html
     assert 'SECRET-' not in html and '192.0.2.' not in html
 print("data script checks passed")

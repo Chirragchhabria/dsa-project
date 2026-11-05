@@ -177,7 +177,15 @@
     const left = document.createElement('div');
     const right = document.createElement('div');
     const overview = document.createElement('section');
-    overview.append(element('h3', 'What was observed'), element('p', row.events + ' related network flows were grouped as ' + row.activity.toLowerCase() + ' activity. This grouping and score are review aids, not proof of an attack.'));
+    const descriptions = {
+      DENIAL_OF_SERVICE: 'Traffic matched a pattern associated with attempts to overwhelm a service.',
+      PORT_SCAN: 'Connections looked like someone checking which network services were reachable.',
+      FAILED_LOGIN: 'Several sign-in attempts failed, which can happen when someone tries to guess access details.'
+    };
+    const plainSummary = Object.keys(row.types).map(type => descriptions[type] || 'Related network activity was recorded.').join(' ');
+    overview.append(element('h3', 'What happened, in simple words'),
+      element('p', plainSummary),
+      element('p', 'The system grouped ' + number(row.events) + ' related flows into this incident. The pattern needs checking: these results alone do not prove an attack or show that a service or account was compromised.', 'case-note'));
     left.append(overview);
     const steps = ['Confirm the time range and compare the grouped flows with firewall, authentication, and service logs.'];
     if (row.types.PORT_SCAN) steps.push('Check targeted hosts and ports, then verify whether scanning was authorized.');

@@ -37,6 +37,10 @@ def render(result: Path, evaluation: Path, output: Path) -> None:
                 "events": len(incident["events"]),
                 "activity": ", ".join(sorted({ACTIVITY.get(event["type"], "Other")
                                              for event in incident["events"]})),
+                "start": incident["start_timestamp"],
+                "end": incident["end_timestamp"],
+                "types": dict(Counter(event["type"] for event in incident["events"])),
+                "reasons": incident["explanations"],
             }
             for incident in incidents
         ],

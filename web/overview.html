@@ -3,36 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="dark">
   <title>10,000-flow study · SOC Correlation</title>
   <style>
-    :root { --paper:#f3f0e9; --surface:#fffdf8; --ink:#15242b; --muted:#526168; --line:#c7cec9; --rust:#7e2e12; --focus:#1b657e; }
+    :root { color-scheme:dark; --paper:#10191d; --surface:#1b292e; --ink:#edf3f0; --muted:#abbebc; --line:#35484c; --rust:#ffb297; --focus:#8ed6e6; }
     * { box-sizing:border-box; }
     html { background:var(--paper); scroll-behavior:smooth; }
     body { margin:0; color:var(--ink); background:var(--paper); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    ::selection { background:#d8e9e6; color:var(--ink); }
+    ::selection { background:#315e66; color:#fff; }
     a { color:inherit; text-underline-offset:3px; }
-    a:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
     .skip { position:absolute; left:-10000px; top:8px; background:var(--surface); padding:8px; z-index:2; }
     .skip:focus { left:8px; }
-    .masthead { background:var(--ink); color:#f5f2e9; padding:22px clamp(20px,4vw,60px) 52px; }
+    .masthead { background:#17262b; color:var(--ink); padding:22px clamp(20px,4vw,60px) 52px; }
     .top { display:flex; align-items:center; justify-content:space-between; gap:24px; }
     .brand { font-size:13px; letter-spacing:.12em; font-weight:700; text-transform:uppercase; }
-    .top a { border:1px solid #81969a; border-radius:6px; padding:8px 12px; text-decoration:none; font-size:13px; font-weight:600; }
+    .top a { border:1px solid #78979c; border-radius:6px; padding:8px 12px; text-decoration:none; font-size:13px; font-weight:600; }
     .top a:hover { background:#294149; }
     .masthead h1 { max-width:850px; margin:55px 0 12px; font:400 clamp(38px,5.5vw,72px)/1.05 Georgia,serif; letter-spacing:-.025em; }
-    .masthead p { max-width:70ch; color:#c8d3d0; margin:0; }
-    .masthead .source { margin-top:15px; font-size:13px; }
+    .masthead p { max-width:70ch; color:var(--muted); margin:0; }
     main { max-width:1320px; margin:auto; padding:0 clamp(20px,4vw,60px) 80px; }
-    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; margin-top:-26px; background:var(--surface); box-shadow:0 8px 24px rgba(10,32,37,.09); border-radius:10px; overflow:hidden; }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; margin-top:-26px; background:var(--surface); box-shadow:0 8px 24px rgba(0,0,0,.24); border-radius:10px; overflow:hidden; }
     .metric { padding:23px 24px 21px; border-right:1px solid var(--line); }
     .metric:last-child { border-right:0; }
     .metric strong { display:block; font:400 clamp(31px,3.2vw,45px)/1.1 Georgia,serif; font-variant-numeric:tabular-nums; }
     .metric span { display:block; margin-top:6px; color:var(--muted); font-size:13px; }
-    .intro { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:55px; padding:55px 0 48px; border-bottom:1px solid var(--line); }
+    .intro { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:55px; padding:48px 0; border-bottom:1px solid var(--line); }
     h2 { font:400 clamp(27px,3vw,38px)/1.13 Georgia,serif; letter-spacing:-.02em; margin:0 0 12px; }
     .intro p { max-width:67ch; margin:0 0 12px; }
     .context { color:var(--muted); }
+    .method { color:var(--muted); font-size:13px; }
+    .method summary { cursor:pointer; width:max-content; color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+    .method p { margin:10px 0 0; }
     .distribution { align-self:start; }
     .distribution h2 { font-size:25px; }
     .distribution dl { margin:0; }
@@ -43,32 +45,52 @@
     .section-head { display:flex; justify-content:space-between; align-items:end; gap:24px; margin-bottom:18px; }
     .section-head p { color:var(--muted); margin:0; }
     .controls { display:flex; gap:8px; }
-    input, select { height:40px; border:1px solid #aeb9b3; border-radius:6px; background:var(--surface); color:var(--ink); padding:0 10px; font:inherit; }
+    input, select { height:40px; border:1px solid #60777a; border-radius:6px; background:var(--surface); color:var(--ink); padding:0 10px; font:inherit; }
     input { min-width:200px; }
-    input::placeholder { color:#66766e; opacity:1; }
+    input::placeholder { color:var(--muted); opacity:1; }
     .table-wrap { overflow-x:auto; background:var(--surface); border-radius:8px; }
     table { border-collapse:collapse; width:100%; min-width:590px; }
-    th, td { padding:12px 16px; text-align:left; border-bottom:1px solid #e2e6e0; }
-    th { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:#e9ede7; }
+    th, td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--line); }
+    th { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:#26373b; }
     tbody tr:last-child td { border-bottom:0; }
-    tbody tr:hover { background:#f4f6f0; }
+    tbody tr:hover { background:#263a3e; }
+    .incident-link { border:0; padding:0; background:none; color:var(--focus); font:inherit; font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+    .incident-detail { margin-top:22px; padding:24px; background:var(--surface); border:1px solid var(--line); border-radius:8px; }
+    .incident-detail h2 { margin-bottom:6px; }
+    .incident-detail h3 { margin:20px 0 7px; font-size:15px; }
+    .incident-detail p { margin:6px 0; }
+    .incident-detail ul { margin:6px 0 0; padding-left:22px; }
+    .incident-detail .context { max-width:75ch; }
     td:nth-child(2), td:nth-child(4) { font-variant-numeric:tabular-nums; }
-    .tag { font-size:11px; font-weight:750; letter-spacing:.05em; border-radius:3px; padding:3px 7px; background:#e5ebe3; color:#345248; }
-    .tag.CRITICAL { background:#f8e8df; color:var(--rust); }
-    .tag.HIGH { background:#f5ead8; color:#70400d; }
+    .tag { font-size:11px; font-weight:750; letter-spacing:.05em; border-radius:3px; padding:3px 7px; background:#29463f; color:#bde7cf; }
+    .tag.CRITICAL { background:#593328; color:var(--rust); }
+    .tag.HIGH { background:#514026; color:#f5d39a; }
     .empty { padding:24px; color:var(--muted); }
-    .foot { color:var(--muted); font-size:13px; margin-top:28px; max-width:75ch; }
     @media (max-width:800px) { .metrics { grid-template-columns:repeat(2,1fr); } .metric:nth-child(2) { border-right:0; } .metric:nth-child(-n+2) { border-bottom:1px solid var(--line); } .intro { grid-template-columns:1fr; gap:30px; } }
     @media (max-width:650px) { .masthead { padding-bottom:47px; } .masthead h1 { margin-top:45px; } .section-head { display:block; } .controls { margin-top:17px; } input { min-width:0; width:100%; } .metrics { margin-top:-21px; } .metric { padding:17px; } .top { align-items:start; } .top a { white-space:nowrap; } }
+    @media (max-width:600px) {
+      .controls { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+      .controls select { max-width:145px; }
+      .table-wrap { background:transparent; overflow:visible; }
+      table, tbody, tr, td { display:block; width:100%; min-width:0; }
+      thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+      tbody { display:grid; gap:10px; }
+      tbody tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 16px; padding:17px 18px; background:var(--surface); border:1px solid var(--line); border-radius:8px; }
+      tbody tr:hover { background:var(--surface); }
+      td { padding:0; border:0; min-width:0; overflow-wrap:anywhere; }
+      td::before { content:attr(data-label); display:block; margin-bottom:2px; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+      td:first-child { grid-column:1 / -1; font-weight:700; font-size:18px; padding-bottom:9px; border-bottom:1px solid var(--line); }
+      td:last-child { grid-column:1 / -1; }
+      .empty { background:var(--surface); border-radius:8px; }
+    }
   </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to results</a>
 <header class="masthead">
   <div class="top"><div class="brand">SOC Correlation</div><a href="/demo.html">Open incident demo</a></div>
-  <h1>10,000 flows. One review queue.</h1>
-  <p>A published summary of our CIDDS-001 evaluation. The C++ engine grouped related network flows into incidents and ranked them for review.</p>
-  <p class="source">Source: <a href="https://www.hs-coburg.de/forschen/cidds-coburg-intrusion-detection-data-sets/">Hochschule Coburg CIDDS-001</a> · 5,000 normal and 5,000 attack-labeled flows sampled from internal week 1</p>
+  <h1>CIDDS-001 incident results</h1>
+  <p>10,000 CIDDS-001 network flows grouped and ranked by the C++ engine.</p>
 </header>
 <main id="main">
   <section class="metrics" aria-label="Evaluation totals">
@@ -78,20 +100,23 @@
     <div class="metric"><strong id="rejected"></strong><span>rows rejected</span></div>
   </section>
   <section class="intro">
-    <div><h2>What the 10,000-flow run shows</h2>
-      <p>The list below contains aggregate details for every incident: priority, score, event count, and activity family. Search or filter to inspect the distribution.</p>
-      <p class="context">Individual flow records and IP addresses are not hosted here. To see event timelines and score reasons, open the <a href="/demo.html">incident dashboard</a> and load your local <code>cidds_result.json</code>.</p>
-      <p class="context">These are network flows from a simulated environment, not native SOC alerts. The scores are review heuristics, not attack probabilities.</p>
+    <div><h2>About this run</h2>
+      <p>Scores help order review; they are not attack probabilities.</p>
+      <details class="method"><summary>Data and limits</summary>
+        <p><a href="https://www.hs-coburg.de/forschen/cidds-coburg-intrusion-detection-data-sets/">CIDDS-001</a> internal week 1: 5,000 normal and 5,000 attack-labeled flows. These simulated network flows are not native SOC alerts.</p>
+        <p>This page shows event categories and score reasons without source records or IP addresses. For individual flow records, <a href="/demo.html">open the demo</a> and load a local <code>cidds_result.json</code>.</p>
+        <p>Ring et al., “Flow-based benchmark data sets for intrusion detection,” ECCWS, 2017. <a href="https://github.com/Chirragchhabria/dsa-project/blob/master/docs/EXTERNAL_EVALUATION.md">Evaluation method and limits</a>.</p>
+      </details>
     </div>
-    <div class="distribution"><h2>Priority mix</h2><dl id="priority-mix"></dl><p class="context">Pairwise grouping on this balanced sample: <strong id="precision"></strong> precision and <strong id="recall"></strong> recall against publisher AttackIDs. <a href="https://github.com/Chirragchhabria/dsa-project/blob/master/docs/EXTERNAL_EVALUATION.md">Read the evaluation limits</a>.</p></div>
+    <div class="distribution"><h2>Priority mix</h2><dl id="priority-mix"></dl><p class="context">Pairwise grouping: <strong id="precision"></strong> precision · <strong id="recall"></strong> recall</p></div>
   </section>
   <section class="incidents" aria-labelledby="incidents-title">
-    <div class="section-head"><div><h2 id="incidents-title">Incident aggregates</h2><p id="match-count" aria-live="polite"></p></div><div class="controls"><input id="search" type="search" placeholder="Find incident or activity" aria-label="Find incident or activity"><select id="priority" aria-label="Filter priority"><option value="">All priorities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option></select></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Incident</th><th>Score</th><th>Priority</th><th>Flows</th><th>Activity</th></tr></thead><tbody id="rows"></tbody></table><p id="empty" class="empty" hidden>No incidents match these filters.</p></div>
-    <p class="foot">CIDDS-001: Ring, M., Wunderlich, S., Gruedl, D., Landes, D., Hotho, A. “Flow-based benchmark data sets for intrusion detection.” ECCWS, 2017. The source records are available from the publisher.</p>
+    <div class="section-head"><div><h2 id="incidents-title">Incidents</h2><p id="match-count" aria-live="polite"></p></div><div class="controls"><input id="search" type="search" placeholder="Search incidents" aria-label="Search incidents"><select id="priority" aria-label="Filter priority"><option value="">All priorities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option></select></div></div>
+    <div class="table-wrap"><table aria-label="Incident aggregates"><thead><tr><th>Incident</th><th>Score</th><th>Priority</th><th>Flows</th><th>Activity</th></tr></thead><tbody id="rows"></tbody></table><p id="empty" class="empty" hidden>No incidents match these filters.</p></div>
+    <section id="incident-detail" class="incident-detail" tabindex="-1" aria-live="polite" hidden></section>
   </section>
 </main>
-<script id="overview-data" type="application/json">{"loaded":10000,"rejected":0,"incidents":61,"clustered":4901,"priorities":{"CRITICAL":24,"HIGH":9,"MEDIUM":28},"precision":1.0,"recall":0.997128267376027,"rows":[{"id":"INC-0009","score":100,"priority":"CRITICAL","events":131,"activity":"DoS"},{"id":"INC-0010","score":100,"priority":"CRITICAL","events":257,"activity":"DoS"},{"id":"INC-0011","score":100,"priority":"CRITICAL","events":17,"activity":"Reconnaissance"},{"id":"INC-0012","score":100,"priority":"CRITICAL","events":127,"activity":"DoS"},{"id":"INC-0019","score":100,"priority":"CRITICAL","events":24,"activity":"Reconnaissance"},{"id":"INC-0020","score":100,"priority":"CRITICAL","events":144,"activity":"DoS"},{"id":"INC-0022","score":100,"priority":"CRITICAL","events":64,"activity":"Reconnaissance"},{"id":"INC-0025","score":100,"priority":"CRITICAL","events":43,"activity":"Reconnaissance"},{"id":"INC-0038","score":100,"priority":"CRITICAL","events":862,"activity":"DoS"},{"id":"INC-0039","score":100,"priority":"CRITICAL","events":51,"activity":"Reconnaissance"},{"id":"INC-0040","score":100,"priority":"CRITICAL","events":1054,"activity":"DoS"},{"id":"INC-0042","score":100,"priority":"CRITICAL","events":28,"activity":"Reconnaissance"},{"id":"INC-0043","score":100,"priority":"CRITICAL","events":37,"activity":"Reconnaissance"},{"id":"INC-0044","score":100,"priority":"CRITICAL","events":20,"activity":"Reconnaissance"},{"id":"INC-0046","score":100,"priority":"CRITICAL","events":265,"activity":"DoS"},{"id":"INC-0048","score":100,"priority":"CRITICAL","events":245,"activity":"DoS"},{"id":"INC-0049","score":100,"priority":"CRITICAL","events":131,"activity":"DoS"},{"id":"INC-0050","score":100,"priority":"CRITICAL","events":71,"activity":"Reconnaissance"},{"id":"INC-0051","score":100,"priority":"CRITICAL","events":449,"activity":"DoS"},{"id":"INC-0058","score":100,"priority":"CRITICAL","events":80,"activity":"Reconnaissance"},{"id":"INC-0060","score":100,"priority":"CRITICAL","events":32,"activity":"Reconnaissance"},{"id":"INC-0061","score":100,"priority":"CRITICAL","events":661,"activity":"DoS"},{"id":"INC-0059","score":96,"priority":"CRITICAL","events":7,"activity":"Reconnaissance"},{"id":"INC-0034","score":82,"priority":"CRITICAL","events":6,"activity":"Reconnaissance"},{"id":"INC-0029","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance"},{"id":"INC-0031","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance"},{"id":"INC-0041","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance"},{"id":"INC-0045","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance"},{"id":"INC-0047","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance"},{"id":"INC-0027","score":54,"priority":"HIGH","events":4,"activity":"Reconnaissance"},{"id":"INC-0024","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance"},{"id":"INC-0028","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance"},{"id":"INC-0055","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance"},{"id":"INC-0008","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance"},{"id":"INC-0016","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance"},{"id":"INC-0030","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance"},{"id":"INC-0001","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0002","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0003","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0004","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0005","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0006","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0007","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0013","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0014","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0015","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0017","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0018","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0021","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0023","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0026","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0032","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0033","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0035","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0036","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0037","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0052","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0053","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0054","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0056","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"},{"id":"INC-0057","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance"}]}</script>
+<script id="overview-data" type="application/json">{"loaded":10000,"rejected":0,"incidents":61,"clustered":4901,"priorities":{"CRITICAL":24,"HIGH":9,"MEDIUM":28},"precision":1.0,"recall":0.997128267376027,"rows":[{"id":"INC-0009","score":100,"priority":"CRITICAL","events":131,"activity":"DoS","start":1489583279,"end":1489583305,"types":{"DENIAL_OF_SERVICE":131},"reasons":["severity contribution: 1572","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0010","score":100,"priority":"CRITICAL","events":257,"activity":"DoS","start":1489585298,"end":1489585424,"types":{"DENIAL_OF_SERVICE":257},"reasons":["severity contribution: 3084","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0011","score":100,"priority":"CRITICAL","events":17,"activity":"Reconnaissance","start":1489587372,"end":1489587679,"types":{"PORT_SCAN":17},"reasons":["severity contribution: 204","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0012","score":100,"priority":"CRITICAL","events":127,"activity":"DoS","start":1489588872,"end":1489588896,"types":{"DENIAL_OF_SERVICE":127},"reasons":["severity contribution: 1524","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0019","score":100,"priority":"CRITICAL","events":24,"activity":"Reconnaissance","start":1489658385,"end":1489658735,"types":{"PORT_SCAN":24},"reasons":["severity contribution: 288","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0020","score":100,"priority":"CRITICAL","events":144,"activity":"DoS","start":1489667849,"end":1489667876,"types":{"DENIAL_OF_SERVICE":144},"reasons":["severity contribution: 1728","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0022","score":100,"priority":"CRITICAL","events":64,"activity":"Reconnaissance","start":1489671949,"end":1489672130,"types":{"PORT_SCAN":64},"reasons":["severity contribution: 768","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0025","score":100,"priority":"CRITICAL","events":43,"activity":"Reconnaissance","start":1489673758,"end":1489676194,"types":{"PORT_SCAN":43},"reasons":["severity contribution: 516","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0038","score":100,"priority":"CRITICAL","events":862,"activity":"DoS","start":1489755868,"end":1489756049,"types":{"DENIAL_OF_SERVICE":862},"reasons":["severity contribution: 10344","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0039","score":100,"priority":"CRITICAL","events":51,"activity":"Reconnaissance","start":1489757094,"end":1489759557,"types":{"PORT_SCAN":51},"reasons":["severity contribution: 612","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0040","score":100,"priority":"CRITICAL","events":1054,"activity":"DoS","start":1489760107,"end":1489760343,"types":{"DENIAL_OF_SERVICE":1054},"reasons":["severity contribution: 12648","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0042","score":100,"priority":"CRITICAL","events":28,"activity":"Reconnaissance","start":1489766543,"end":1489768658,"types":{"PORT_SCAN":28},"reasons":["severity contribution: 336","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0043","score":100,"priority":"CRITICAL","events":37,"activity":"Reconnaissance","start":1489770318,"end":1489773042,"types":{"PORT_SCAN":37},"reasons":["severity contribution: 444","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0044","score":100,"priority":"CRITICAL","events":20,"activity":"Reconnaissance","start":1490000630,"end":1490000855,"types":{"PORT_SCAN":20},"reasons":["severity contribution: 240","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0046","score":100,"priority":"CRITICAL","events":265,"activity":"DoS","start":1490001981,"end":1490002048,"types":{"DENIAL_OF_SERVICE":265},"reasons":["severity contribution: 3180","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0048","score":100,"priority":"CRITICAL","events":245,"activity":"DoS","start":1490004761,"end":1490004811,"types":{"DENIAL_OF_SERVICE":245},"reasons":["severity contribution: 2940","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0049","score":100,"priority":"CRITICAL","events":131,"activity":"DoS","start":1490010351,"end":1490010386,"types":{"DENIAL_OF_SERVICE":131},"reasons":["severity contribution: 1572","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0050","score":100,"priority":"CRITICAL","events":71,"activity":"Reconnaissance","start":1490011351,"end":1490011623,"types":{"PORT_SCAN":71},"reasons":["severity contribution: 852","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0051","score":100,"priority":"CRITICAL","events":449,"activity":"DoS","start":1490012704,"end":1490012848,"types":{"DENIAL_OF_SERVICE":449},"reasons":["severity contribution: 5388","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0058","score":100,"priority":"CRITICAL","events":80,"activity":"Reconnaissance","start":1490101198,"end":1490101551,"types":{"PORT_SCAN":80},"reasons":["severity contribution: 960","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0060","score":100,"priority":"CRITICAL","events":32,"activity":"Reconnaissance","start":1490105090,"end":1490107014,"types":{"PORT_SCAN":32},"reasons":["severity contribution: 384","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0061","score":100,"priority":"CRITICAL","events":661,"activity":"DoS","start":1490108672,"end":1490108827,"types":{"DENIAL_OF_SERVICE":661},"reasons":["severity contribution: 7932","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0059","score":96,"priority":"CRITICAL","events":7,"activity":"Reconnaissance","start":1490103965,"end":1490104314,"types":{"PORT_SCAN":7},"reasons":["severity contribution: 84","multi-event chain bonus: 12"]},{"id":"INC-0034","score":82,"priority":"CRITICAL","events":6,"activity":"Reconnaissance","start":1489691543,"end":1489692162,"types":{"PORT_SCAN":6},"reasons":["severity contribution: 72","multi-event chain bonus: 10"]},{"id":"INC-0029","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance","start":1489681403,"end":1489681783,"types":{"PORT_SCAN":5},"reasons":["severity contribution: 60","multi-event chain bonus: 8"]},{"id":"INC-0031","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance","start":1489685211,"end":1489685932,"types":{"PORT_SCAN":5},"reasons":["severity contribution: 60","multi-event chain bonus: 8"]},{"id":"INC-0041","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance","start":1489765779,"end":1489766231,"types":{"PORT_SCAN":5},"reasons":["severity contribution: 60","multi-event chain bonus: 8"]},{"id":"INC-0045","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance","start":1490001349,"end":1490001524,"types":{"PORT_SCAN":4},"reasons":["severity contribution: 48","multi-event chain bonus: 6","dense activity within five minutes: 10"]},{"id":"INC-0047","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance","start":1490002795,"end":1490002942,"types":{"PORT_SCAN":4},"reasons":["severity contribution: 48","multi-event chain bonus: 6","dense activity within five minutes: 10"]},{"id":"INC-0027","score":54,"priority":"HIGH","events":4,"activity":"Reconnaissance","start":1489680174,"end":1489680531,"types":{"PORT_SCAN":4},"reasons":["severity contribution: 48","multi-event chain bonus: 6"]},{"id":"INC-0024","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance","start":1489673103,"end":1489673237,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4","dense activity within five minutes: 10"]},{"id":"INC-0028","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance","start":1489680864,"end":1489681017,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4","dense activity within five minutes: 10"]},{"id":"INC-0055","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance","start":1490081196,"end":1490081402,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4","dense activity within five minutes: 10"]},{"id":"INC-0008","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance","start":1489578721,"end":1489579136,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4"]},{"id":"INC-0016","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance","start":1489601659,"end":1489602079,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4"]},{"id":"INC-0030","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance","start":1489683007,"end":1489683382,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4"]},{"id":"INC-0001","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489543004,"end":1489543234,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0002","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489546879,"end":1489547144,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0003","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489552351,"end":1489552432,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0004","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489553029,"end":1489553066,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0005","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489557492,"end":1489557573,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0006","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489559109,"end":1489559154,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0007","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489561334,"end":1489561602,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0013","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489589466,"end":1489589718,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0014","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489592133,"end":1489592209,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0015","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489595510,"end":1489595759,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0017","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489605409,"end":1489605506,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0018","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489652771,"end":1489652815,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0021","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489669004,"end":1489669113,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0023","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489672597,"end":1489672782,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0026","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489677207,"end":1489677489,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0032","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489687543,"end":1489687647,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0033","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489689708,"end":1489689786,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0035","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489692810,"end":1489692870,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0036","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489693204,"end":1489693220,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0037","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489694000,"end":1489694257,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0052","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490040133,"end":1490040134,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0053","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490058979,"end":1490059179,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0054","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490060435,"end":1490060558,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0056","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490092523,"end":1490092749,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0057","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490095091,"end":1490095181,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]}]}</script>
 <script>
   const data = JSON.parse(document.getElementById('overview-data').textContent);
   const byId = id => document.getElementById(id);
@@ -108,6 +133,42 @@
     item.append(label, value);
     byId('priority-mix').append(item);
   }
+  function showDetail(row) {
+    const detail = byId('incident-detail');
+    detail.replaceChildren();
+    const heading = document.createElement('h2');
+    heading.textContent = row.id + ' · ' + row.score + ' / 100';
+    const summary = document.createElement('p');
+    summary.textContent = row.events + ' ' + row.activity + ' flows · ' +
+      new Date(row.start * 1000).toLocaleString() + ' – ' + new Date(row.end * 1000).toLocaleString();
+    const note = document.createElement('p');
+    note.className = 'context';
+    note.textContent = 'This score ranks the incident for review. It does not establish intent, unauthorized access, or a probability of attack.';
+    const activity = document.createElement('p');
+    activity.textContent = Object.keys(row.types).map(type => ({
+      DENIAL_OF_SERVICE: 'Repeated traffic consistent with a denial-of-service scenario.',
+      PORT_SCAN: 'Connections probing services or ports.',
+      FAILED_LOGIN: 'Failed sign-in attempts.'
+    })[type] || 'Related network activity.').join(' ');
+    detail.append(heading, summary, activity, note);
+    for (const [title, entries] of [
+      ['Observed activity', Object.entries(row.types).map(([type, count]) => type.replaceAll('_', ' ') + ': ' + count + ' flows')],
+      ['Why this score', row.reasons]
+    ]) {
+      const label = document.createElement('h3');
+      label.textContent = title;
+      const list = document.createElement('ul');
+      for (const entry of entries) {
+        const item = document.createElement('li');
+        item.textContent = entry;
+        list.append(item);
+      }
+      detail.append(label, list);
+    }
+    detail.hidden = false;
+    detail.focus();
+    detail.scrollIntoView({behavior:'smooth', block:'start'});
+  }
   function render() {
     const query = byId('search').value.trim().toLowerCase();
     const priority = byId('priority').value;
@@ -117,13 +178,21 @@
     body.replaceChildren();
     for (const row of rows) {
       const tr = document.createElement('tr');
-      for (const value of [row.id, row.score + ' / 100', row.priority, number(row.events), row.activity]) {
+      const values = [row.id, row.score + ' / 100', row.priority, number(row.events), row.activity];
+      for (const [index, value] of values.entries()) {
         const td = document.createElement('td');
+        td.dataset.label = ['Incident', 'Score', 'Priority', 'Flows', 'Activity'][index];
         if (value === row.priority) {
           const badge = document.createElement('span');
           badge.className = 'tag ' + row.priority;
           badge.textContent = value;
           td.append(badge);
+        } else if (index === 0) {
+          const button = document.createElement('button');
+          button.className = 'incident-link';
+          button.textContent = value;
+          button.addEventListener('click', () => showDetail(row));
+          td.append(button);
         } else td.textContent = value;
         tr.append(td);
       }

@@ -61,6 +61,8 @@ with tempfile.TemporaryDirectory() as directory:
     overview = root / "overview.html"
     result.write_text('''{"schema_version":2,"summary":{"events_loaded":2,"events_rejected":0},
       "incidents":[{"id":"INC-0001","risk_score":80,"priority":"CRITICAL",
+      "start_timestamp":100,"end_timestamp":130,
+      "explanations":["severity contribution: 24","multi-event chain bonus: 2"],
       "events":[{"id":"SECRET-1","type":"PORT_SCAN","source_ip":"192.0.2.1"},
                 {"id":"SECRET-2","type":"PORT_SCAN","source_ip":"192.0.2.2"}]}]}''')
     evaluation.write_text('{"events":2,"incidents":1,"pairwise_precision":1,"pairwise_recall":1}')
@@ -68,5 +70,7 @@ with tempfile.TemporaryDirectory() as directory:
     html = overview.read_text()
     assert '"loaded":2' in html and '"events":2' in html
     assert 'INC-0001' in html and 'Reconnaissance' in html
+    assert 'severity contribution: 24' in html and '"start":100' in html
+    assert 'id="incident-detail"' in html and 'showDetail(row)' in html
     assert 'SECRET-' not in html and '192.0.2.' not in html
 print("data script checks passed")

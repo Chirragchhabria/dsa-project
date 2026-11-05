@@ -54,19 +54,31 @@
     th { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:#26373b; }
     tbody tr:last-child td { border-bottom:0; }
     tbody tr:hover { background:#263a3e; }
-    .incident-link { border:0; padding:0; background:none; color:var(--focus); font:inherit; font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
-    .incident-detail { margin-top:22px; padding:24px; background:var(--surface); border:1px solid var(--line); border-radius:8px; }
-    .incident-detail h2 { margin-bottom:6px; }
-    .incident-detail h3 { margin:20px 0 7px; font-size:15px; }
-    .incident-detail p { margin:6px 0; }
-    .incident-detail ul { margin:6px 0 0; padding-left:22px; }
-    .incident-detail .context { max-width:75ch; }
+    .incident-link { color:var(--focus); font-weight:700; text-decoration:underline; text-underline-offset:3px; }
+    .case-page { max-width:1050px; padding-top:36px; }
+    .back-link { display:inline-block; margin-bottom:32px; color:var(--focus); font-weight:600; }
+    .case-heading { display:flex; justify-content:space-between; align-items:start; gap:24px; padding-bottom:25px; border-bottom:1px solid var(--line); }
+    .case-heading h2 { margin:9px 0; font-size:clamp(35px,5vw,58px); }
+    .case-heading p { margin:0; color:var(--muted); }
+    .case-score { font:400 48px/1 Georgia,serif; white-space:nowrap; }
+    .case-score small { display:block; margin-top:5px; color:var(--muted); font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; text-align:right; }
+    .case-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:clamp(28px,5vw,70px); padding-top:35px; }
+    .case-grid section { padding-bottom:26px; }
+    .case-grid h3 { margin:0 0 12px; font:400 27px/1.2 Georgia,serif; }
+    .case-grid p { margin:0 0 13px; }
+    .case-grid ol, .case-grid ul { margin:0; padding-left:22px; }
+    .case-grid li { padding:4px 0; }
+    .case-facts { margin:0; }
+    .case-facts div { display:flex; justify-content:space-between; gap:18px; padding:10px 0; border-bottom:1px solid var(--line); }
+    .case-facts dt { color:var(--muted); }
+    .case-facts dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
+    .case-note { color:var(--muted); font-size:13px; }
     td:nth-child(2), td:nth-child(4) { font-variant-numeric:tabular-nums; }
     .tag { font-size:11px; font-weight:750; letter-spacing:.05em; border-radius:3px; padding:3px 7px; background:#29463f; color:#bde7cf; }
     .tag.CRITICAL { background:#593328; color:var(--rust); }
     .tag.HIGH { background:#514026; color:#f5d39a; }
     .empty { padding:24px; color:var(--muted); }
-    @media (max-width:800px) { .metrics { grid-template-columns:repeat(2,1fr); } .metric:nth-child(2) { border-right:0; } .metric:nth-child(-n+2) { border-bottom:1px solid var(--line); } .intro { grid-template-columns:1fr; gap:30px; } }
+    @media (max-width:800px) { .metrics { grid-template-columns:repeat(2,1fr); } .metric:nth-child(2) { border-right:0; } .metric:nth-child(-n+2) { border-bottom:1px solid var(--line); } .intro, .case-grid { grid-template-columns:1fr; gap:30px; } }
     @media (max-width:650px) { .masthead { padding-bottom:47px; } .masthead h1 { margin-top:45px; } .section-head { display:block; } .controls { margin-top:17px; } input { min-width:0; width:100%; } .metrics { margin-top:-21px; } .metric { padding:17px; } .top { align-items:start; } .top a { white-space:nowrap; } }
     @media (max-width:600px) {
       .controls { display:grid; grid-template-columns:minmax(0,1fr) auto; }
@@ -113,9 +125,9 @@
   <section class="incidents" aria-labelledby="incidents-title">
     <div class="section-head"><div><h2 id="incidents-title">Incidents</h2><p id="match-count" aria-live="polite"></p></div><div class="controls"><input id="search" type="search" placeholder="Search incidents" aria-label="Search incidents"><select id="priority" aria-label="Filter priority"><option value="">All priorities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option></select></div></div>
     <div class="table-wrap"><table aria-label="Incident aggregates"><thead><tr><th>Incident</th><th>Score</th><th>Priority</th><th>Flows</th><th>Activity</th></tr></thead><tbody id="rows"></tbody></table><p id="empty" class="empty" hidden>No incidents match these filters.</p></div>
-    <section id="incident-detail" class="incident-detail" tabindex="-1" aria-live="polite" hidden></section>
   </section>
 </main>
+<main id="case-page" class="case-page" hidden></main>
 <script id="overview-data" type="application/json">{"loaded":10000,"rejected":0,"incidents":61,"clustered":4901,"priorities":{"CRITICAL":24,"HIGH":9,"MEDIUM":28},"precision":1.0,"recall":0.997128267376027,"rows":[{"id":"INC-0009","score":100,"priority":"CRITICAL","events":131,"activity":"DoS","start":1489583279,"end":1489583305,"types":{"DENIAL_OF_SERVICE":131},"reasons":["severity contribution: 1572","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0010","score":100,"priority":"CRITICAL","events":257,"activity":"DoS","start":1489585298,"end":1489585424,"types":{"DENIAL_OF_SERVICE":257},"reasons":["severity contribution: 3084","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0011","score":100,"priority":"CRITICAL","events":17,"activity":"Reconnaissance","start":1489587372,"end":1489587679,"types":{"PORT_SCAN":17},"reasons":["severity contribution: 204","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0012","score":100,"priority":"CRITICAL","events":127,"activity":"DoS","start":1489588872,"end":1489588896,"types":{"DENIAL_OF_SERVICE":127},"reasons":["severity contribution: 1524","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0019","score":100,"priority":"CRITICAL","events":24,"activity":"Reconnaissance","start":1489658385,"end":1489658735,"types":{"PORT_SCAN":24},"reasons":["severity contribution: 288","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0020","score":100,"priority":"CRITICAL","events":144,"activity":"DoS","start":1489667849,"end":1489667876,"types":{"DENIAL_OF_SERVICE":144},"reasons":["severity contribution: 1728","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0022","score":100,"priority":"CRITICAL","events":64,"activity":"Reconnaissance","start":1489671949,"end":1489672130,"types":{"PORT_SCAN":64},"reasons":["severity contribution: 768","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0025","score":100,"priority":"CRITICAL","events":43,"activity":"Reconnaissance","start":1489673758,"end":1489676194,"types":{"PORT_SCAN":43},"reasons":["severity contribution: 516","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0038","score":100,"priority":"CRITICAL","events":862,"activity":"DoS","start":1489755868,"end":1489756049,"types":{"DENIAL_OF_SERVICE":862},"reasons":["severity contribution: 10344","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0039","score":100,"priority":"CRITICAL","events":51,"activity":"Reconnaissance","start":1489757094,"end":1489759557,"types":{"PORT_SCAN":51},"reasons":["severity contribution: 612","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0040","score":100,"priority":"CRITICAL","events":1054,"activity":"DoS","start":1489760107,"end":1489760343,"types":{"DENIAL_OF_SERVICE":1054},"reasons":["severity contribution: 12648","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0042","score":100,"priority":"CRITICAL","events":28,"activity":"Reconnaissance","start":1489766543,"end":1489768658,"types":{"PORT_SCAN":28},"reasons":["severity contribution: 336","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0043","score":100,"priority":"CRITICAL","events":37,"activity":"Reconnaissance","start":1489770318,"end":1489773042,"types":{"PORT_SCAN":37},"reasons":["severity contribution: 444","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0044","score":100,"priority":"CRITICAL","events":20,"activity":"Reconnaissance","start":1490000630,"end":1490000855,"types":{"PORT_SCAN":20},"reasons":["severity contribution: 240","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0046","score":100,"priority":"CRITICAL","events":265,"activity":"DoS","start":1490001981,"end":1490002048,"types":{"DENIAL_OF_SERVICE":265},"reasons":["severity contribution: 3180","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0048","score":100,"priority":"CRITICAL","events":245,"activity":"DoS","start":1490004761,"end":1490004811,"types":{"DENIAL_OF_SERVICE":245},"reasons":["severity contribution: 2940","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0049","score":100,"priority":"CRITICAL","events":131,"activity":"DoS","start":1490010351,"end":1490010386,"types":{"DENIAL_OF_SERVICE":131},"reasons":["severity contribution: 1572","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0050","score":100,"priority":"CRITICAL","events":71,"activity":"Reconnaissance","start":1490011351,"end":1490011623,"types":{"PORT_SCAN":71},"reasons":["severity contribution: 852","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0051","score":100,"priority":"CRITICAL","events":449,"activity":"DoS","start":1490012704,"end":1490012848,"types":{"DENIAL_OF_SERVICE":449},"reasons":["severity contribution: 5388","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0058","score":100,"priority":"CRITICAL","events":80,"activity":"Reconnaissance","start":1490101198,"end":1490101551,"types":{"PORT_SCAN":80},"reasons":["severity contribution: 960","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0060","score":100,"priority":"CRITICAL","events":32,"activity":"Reconnaissance","start":1490105090,"end":1490107014,"types":{"PORT_SCAN":32},"reasons":["severity contribution: 384","multi-event chain bonus: 20","score capped at 100"]},{"id":"INC-0061","score":100,"priority":"CRITICAL","events":661,"activity":"DoS","start":1490108672,"end":1490108827,"types":{"DENIAL_OF_SERVICE":661},"reasons":["severity contribution: 7932","multi-event chain bonus: 20","dense activity within five minutes: 10","score capped at 100"]},{"id":"INC-0059","score":96,"priority":"CRITICAL","events":7,"activity":"Reconnaissance","start":1490103965,"end":1490104314,"types":{"PORT_SCAN":7},"reasons":["severity contribution: 84","multi-event chain bonus: 12"]},{"id":"INC-0034","score":82,"priority":"CRITICAL","events":6,"activity":"Reconnaissance","start":1489691543,"end":1489692162,"types":{"PORT_SCAN":6},"reasons":["severity contribution: 72","multi-event chain bonus: 10"]},{"id":"INC-0029","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance","start":1489681403,"end":1489681783,"types":{"PORT_SCAN":5},"reasons":["severity contribution: 60","multi-event chain bonus: 8"]},{"id":"INC-0031","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance","start":1489685211,"end":1489685932,"types":{"PORT_SCAN":5},"reasons":["severity contribution: 60","multi-event chain bonus: 8"]},{"id":"INC-0041","score":68,"priority":"HIGH","events":5,"activity":"Reconnaissance","start":1489765779,"end":1489766231,"types":{"PORT_SCAN":5},"reasons":["severity contribution: 60","multi-event chain bonus: 8"]},{"id":"INC-0045","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance","start":1490001349,"end":1490001524,"types":{"PORT_SCAN":4},"reasons":["severity contribution: 48","multi-event chain bonus: 6","dense activity within five minutes: 10"]},{"id":"INC-0047","score":64,"priority":"HIGH","events":4,"activity":"Reconnaissance","start":1490002795,"end":1490002942,"types":{"PORT_SCAN":4},"reasons":["severity contribution: 48","multi-event chain bonus: 6","dense activity within five minutes: 10"]},{"id":"INC-0027","score":54,"priority":"HIGH","events":4,"activity":"Reconnaissance","start":1489680174,"end":1489680531,"types":{"PORT_SCAN":4},"reasons":["severity contribution: 48","multi-event chain bonus: 6"]},{"id":"INC-0024","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance","start":1489673103,"end":1489673237,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4","dense activity within five minutes: 10"]},{"id":"INC-0028","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance","start":1489680864,"end":1489681017,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4","dense activity within five minutes: 10"]},{"id":"INC-0055","score":50,"priority":"HIGH","events":3,"activity":"Reconnaissance","start":1490081196,"end":1490081402,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4","dense activity within five minutes: 10"]},{"id":"INC-0008","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance","start":1489578721,"end":1489579136,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4"]},{"id":"INC-0016","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance","start":1489601659,"end":1489602079,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4"]},{"id":"INC-0030","score":40,"priority":"MEDIUM","events":3,"activity":"Reconnaissance","start":1489683007,"end":1489683382,"types":{"PORT_SCAN":3},"reasons":["severity contribution: 36","multi-event chain bonus: 4"]},{"id":"INC-0001","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489543004,"end":1489543234,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0002","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489546879,"end":1489547144,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0003","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489552351,"end":1489552432,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0004","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489553029,"end":1489553066,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0005","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489557492,"end":1489557573,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0006","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489559109,"end":1489559154,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0007","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489561334,"end":1489561602,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0013","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489589466,"end":1489589718,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0014","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489592133,"end":1489592209,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0015","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489595510,"end":1489595759,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0017","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489605409,"end":1489605506,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0018","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489652771,"end":1489652815,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0021","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489669004,"end":1489669113,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0023","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489672597,"end":1489672782,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0026","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489677207,"end":1489677489,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0032","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489687543,"end":1489687647,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0033","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489689708,"end":1489689786,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0035","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489692810,"end":1489692870,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0036","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489693204,"end":1489693220,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0037","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1489694000,"end":1489694257,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0052","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490040133,"end":1490040134,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0053","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490058979,"end":1490059179,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0054","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490060435,"end":1490060558,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0056","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490092523,"end":1490092749,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]},{"id":"INC-0057","score":26,"priority":"MEDIUM","events":2,"activity":"Reconnaissance","start":1490095091,"end":1490095181,"types":{"PORT_SCAN":2},"reasons":["severity contribution: 24","multi-event chain bonus: 2"]}]}</script>
 <script>
   const data = JSON.parse(document.getElementById('overview-data').textContent);
@@ -133,41 +145,66 @@
     item.append(label, value);
     byId('priority-mix').append(item);
   }
+  const element = (tag, text, className) => {
+    const item = document.createElement(tag);
+    item.textContent = text;
+    if (className) item.className = className;
+    return item;
+  };
+  const section = (title, entries, ordered = false) => {
+    const wrapper = document.createElement('section');
+    wrapper.append(element('h3', title));
+    const list = document.createElement(ordered ? 'ol' : 'ul');
+    for (const entry of entries) list.append(element('li', entry));
+    wrapper.append(list);
+    return wrapper;
+  };
   function showDetail(row) {
-    const detail = byId('incident-detail');
-    detail.replaceChildren();
-    const heading = document.createElement('h2');
-    heading.textContent = row.id + ' · ' + row.score + ' / 100';
-    const summary = document.createElement('p');
-    summary.textContent = row.events + ' ' + row.activity + ' flows · ' +
-      new Date(row.start * 1000).toLocaleString() + ' – ' + new Date(row.end * 1000).toLocaleString();
-    const note = document.createElement('p');
-    note.className = 'context';
-    note.textContent = 'This score ranks the incident for review. It does not establish intent, unauthorized access, or a probability of attack.';
-    const activity = document.createElement('p');
-    activity.textContent = Object.keys(row.types).map(type => ({
-      DENIAL_OF_SERVICE: 'Repeated traffic consistent with a denial-of-service scenario.',
-      PORT_SCAN: 'Connections probing services or ports.',
-      FAILED_LOGIN: 'Failed sign-in attempts.'
-    })[type] || 'Related network activity.').join(' ');
-    detail.append(heading, summary, activity, note);
-    for (const [title, entries] of [
-      ['Observed activity', Object.entries(row.types).map(([type, count]) => type.replaceAll('_', ' ') + ': ' + count + ' flows')],
-      ['Why this score', row.reasons]
-    ]) {
-      const label = document.createElement('h3');
-      label.textContent = title;
-      const list = document.createElement('ul');
-      for (const entry of entries) {
-        const item = document.createElement('li');
-        item.textContent = entry;
-        list.append(item);
-      }
-      detail.append(label, list);
+    const page = byId('case-page');
+    byId('main').hidden = true;
+    page.hidden = false;
+    document.title = row.id + ' · Incident review';
+    const back = element('a', '← All incidents', 'back-link');
+    back.href = 'overview.html#incidents-title';
+    const head = element('div', '', 'case-heading');
+    const title = document.createElement('div');
+    title.append(element('span', row.priority, 'tag ' + row.priority), element('h2', row.id),
+      element('p', 'First seen ' + new Date(row.start * 1000).toLocaleString() + ' · Last seen ' + new Date(row.end * 1000).toLocaleString()));
+    const score = element('div', String(row.score), 'case-score');
+    score.append(element('small', 'review score / 100'));
+    head.append(title, score);
+    const grid = element('div', '', 'case-grid');
+    const left = document.createElement('div');
+    const right = document.createElement('div');
+    const overview = document.createElement('section');
+    overview.append(element('h3', 'What was observed'), element('p', row.events + ' related network flows were grouped as ' + row.activity.toLowerCase() + ' activity. This grouping and score are review aids, not proof of an attack.'));
+    left.append(overview);
+    const steps = ['Confirm the time range and compare the grouped flows with firewall, authentication, and service logs.'];
+    if (row.types.PORT_SCAN) steps.push('Check targeted hosts and ports, then verify whether scanning was authorized.');
+    if (row.types.FAILED_LOGIN) steps.push('Review affected accounts, successful sign-ins after failures, and MFA or lockout events.');
+    if (row.types.DENIAL_OF_SERVICE) steps.push('Check service availability and traffic rates; apply rate limiting or filtering only if disruption is confirmed.');
+    steps.push('If the activity is unauthorized, contain the source or affected account using your response procedure, preserve evidence, and monitor for recurrence.');
+    left.append(section('Investigation and response', steps, true));
+    left.append(section('Why it was ranked here', row.reasons));
+    const facts = document.createElement('section');
+    facts.append(element('h3', 'Incident details'));
+    const dl = element('dl', '', 'case-facts');
+    for (const [label, value] of [['Priority', row.priority], ['Flows', number(row.events)], ['Activity families', row.activity], ['Start', new Date(row.start * 1000).toLocaleString()], ['End', new Date(row.end * 1000).toLocaleString()]]) {
+      const pair = document.createElement('div');
+      pair.append(element('dt', label), element('dd', value));
+      dl.append(pair);
     }
-    detail.hidden = false;
-    detail.focus();
-    detail.scrollIntoView({behavior:'smooth', block:'start'});
+    facts.append(dl);
+    right.append(facts, section('Activity counts', Object.entries(row.types).map(([type, count]) => type.replaceAll('_', ' ') + ': ' + number(count) + ' flows')));
+    const note = document.createElement('section');
+    note.append(element('h3', 'Source records'));
+    const text = element('p', 'This public page contains aggregate results only. Individual flow records, IP addresses, and event timelines are available in the local result JSON through the incident demo.', 'case-note');
+    const demo = element('a', 'Open incident demo', 'back-link');
+    demo.href = 'demo.html';
+    note.append(text, demo);
+    right.append(note);
+    grid.append(left, right);
+    page.append(back, head, grid);
   }
   function render() {
     const query = byId('search').value.trim().toLowerCase();
@@ -188,11 +225,11 @@
           badge.textContent = value;
           td.append(badge);
         } else if (index === 0) {
-          const button = document.createElement('button');
-          button.className = 'incident-link';
-          button.textContent = value;
-          button.addEventListener('click', () => showDetail(row));
-          td.append(button);
+          const link = document.createElement('a');
+          link.className = 'incident-link';
+          link.textContent = value;
+          link.href = 'overview.html?incident=' + encodeURIComponent(row.id);
+          td.append(link);
         } else td.textContent = value;
         tr.append(td);
       }
@@ -203,7 +240,10 @@
   }
   byId('search').addEventListener('input', render);
   byId('priority').addEventListener('change', render);
-  render();
+  const requested = new URLSearchParams(location.search).get('incident');
+  const selected = data.rows.find(row => row.id === requested);
+  if (selected) showDetail(selected);
+  else render();
 </script>
 </body>
 </html>
